@@ -1,0 +1,2024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DataPreVisual: Feature Selection & Model Sparsity Interactive Laboratory</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    :root {
+      --neu-blue: #084C90;
+      --neu-navy: #052C52;
+      --neu-red: #AE152D;
+      --neu-gold: #F8C008;
+      --dpv-teal: #0A8080;
+    }
+    .bg-neu-navy { background-color: var(--neu-navy); }
+    .bg-neu-blue { background-color: var(--neu-blue); }
+    .text-neu-gold { color: var(--neu-gold); }
+    .text-neu-blue { color: var(--neu-blue); }
+    .text-neu-red { color: var(--neu-red); }
+    .border-neu-blue { border-color: var(--neu-blue); }
+    .border-neu-gold { border-color: var(--neu-gold); }
+    .tab-active {
+      background-color: var(--neu-blue);
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(8, 76, 144, 0.4);
+    }
+    canvas {
+      image-rendering: -webkit-optimize-contrast;
+      user-select: none;
+    }
+    input[type=range] {
+      accent-color: var(--neu-blue);
+    }
+    .math-pill {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(51, 65, 85, 0.7);
+      padding: 0.15rem 0.5rem;
+      border-radius: 0.375rem;
+    }
+    .interactive-card {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .interactive-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased flex flex-col font-sans">
+
+  <!-- HEADER -->
+  <header class="bg-gradient-to-r from-[#052C52] via-[#084C90] to-[#052C52] border-b border-amber-400/30 px-6 py-4 shadow-2xl">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-amber-400 flex items-center justify-center font-bold text-[#052C52] text-xl shadow-lg border border-amber-300">
+          DPV
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs tracking-wider uppercase font-semibold text-amber-300">National Economics University • Faculty of Mathematical Economics</span>
+          </div>
+          <h1 class="text-xl md:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+            Feature Selection & Model Sparsity Interactive Laboratory
+          </h1>
+          <p class="text-xs text-slate-300">Statistical Filters • Combinatorial Wrappers • Embedded Sparsity • Leakage & Pipeline Architecture</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 text-xs">
+        <span class="px-3 py-1 bg-white/10 rounded-full border border-white/20 text-slate-200">Interactive Visual Sandbox</span>
+        <span class="px-3 py-1 bg-emerald-500/20 text-emerald-300 rounded-full border border-emerald-500/40 font-mono">Real-time Reactive Engine</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- NAVIGATION BAR (MODULE ORDER 1 -> 2 -> 3 -> 4) -->
+  <nav class="bg-slate-900/90 border-b border-slate-800 sticky top-0 z-50 backdrop-blur px-6 py-2.5">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex flex-wrap gap-2">
+        <button onclick="switchTab('tab-filters')" id="btn-tab-filters" class="tab-btn px-4 py-2 rounded-lg text-sm transition-all duration-200 tab-active">
+          Module 1: Statistical Filter Methods
+        </button>
+        <button onclick="switchTab('tab-wrappers')" id="btn-tab-wrappers" class="tab-btn px-4 py-2 rounded-lg text-sm transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800">
+          Module 2: Wrapper Methods & Combinatorial Search
+        </button>
+        <button onclick="switchTab('tab-embedded')" id="btn-tab-embedded" class="tab-btn px-4 py-2 rounded-lg text-sm transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800">
+          Module 3: Embedded Models & Tree Importance Traps
+        </button>
+        <button onclick="switchTab('tab-pipelines')" id="btn-tab-pipelines" class="tab-btn px-4 py-2 rounded-lg text-sm transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800">
+          Module 4: Production Pipelines & Freedman's Paradox
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN VIEWPORT -->
+  <main class="flex-1 max-w-7xl mx-auto w-full p-6 space-y-8">
+
+    <!-- =================================================================== -->
+    <!-- MODULE 1: STATISTICAL FILTER METHODS -->
+    <!-- =================================================================== -->
+    <section id="tab-filters" class="tab-content space-y-6">
+
+      <!-- SECTION 1: CHI-SQUARED CONTINGENCY TABLE STUDIO -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-800">
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-wider text-amber-400">Module 1 • Categorical vs Categorical Association</span>
+            <h2 class="text-xl font-bold text-white">Chi-Squared (&chi;&sup2;) Contingency Table &amp; Cochran Condition</h2>
+            <p class="text-sm text-slate-300">Live computation of observed vs expected frequencies, cell residuals, and statistical independence test.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="loadChi2Preset('telecom')" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-medium transition shadow">
+              Telecom Churn Preset (N=60)
+            </button>
+            <button onclick="loadChi2Preset('loan')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-medium transition shadow">
+              Loan Default vs Education (N=80)
+            </button>
+            <button onclick="loadChi2Preset('independent')" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-xs font-medium transition shadow">
+              Independent Noise Preset
+            </button>
+          </div>
+        </div>
+
+        <!-- DOMAIN BARRIER WARNING -->
+        <div class="bg-amber-950/40 border border-amber-500/40 rounded-xl p-4 flex items-start gap-3">
+          <span class="text-amber-400 text-xl font-bold">⚠️</span>
+          <div class="text-xs text-amber-200/90 leading-relaxed">
+            <strong class="text-amber-300">Non-Negative Input Requirement (X &ge; 0):</strong>
+            Scikit-Learn's <code class="math-pill text-amber-300">sklearn.feature_selection.chi2</code> requires non-negative frequencies or binary counts. Passing negative values (e.g. from <code class="math-pill text-amber-300">StandardScaler</code>) will instantly throw a <code class="text-rose-400 font-mono">ValueError</code>. Always scale with <code class="math-pill text-emerald-300">MinMaxScaler</code> or keep raw counts prior to Chi-Squared testing.
+          </div>
+        </div>
+
+        <!-- CONTINGENCY TABLE GRID & METRICS -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- 2x2 Observed Table -->
+          <div class="lg:col-span-6 bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-4">
+            <div class="flex justify-between items-center">
+              <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+                Observed Contingency Table (O<sub>ij</sub>)
+              </h3>
+              <span class="text-[11px] text-slate-400">Edit cells to recalculate live</span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs text-center border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-800 text-slate-400">
+                    <th class="py-2 text-left">Category</th>
+                    <th class="py-2 text-rose-400 font-semibold">Event (y = 1)</th>
+                    <th class="py-2 text-emerald-400 font-semibold">No Event (y = 0)</th>
+                    <th class="py-2 text-slate-300">Row Total (R<sub>i</sub>)</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800/60 font-mono">
+                  <tr>
+                    <td class="py-2 text-left font-sans font-medium text-slate-300">Group A (Basic)</td>
+                    <td class="py-2">
+                      <input type="number" id="chi-o11" value="20" min="0" class="w-16 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-center text-amber-300 font-bold focus:border-blue-500 focus:outline-none" oninput="updateChi2Simulation()">
+                    </td>
+                    <td class="py-2">
+                      <input type="number" id="chi-o12" value="10" min="0" class="w-16 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-center text-amber-300 font-bold focus:border-blue-500 focus:outline-none" oninput="updateChi2Simulation()">
+                    </td>
+                    <td id="chi-r1" class="py-2 font-bold text-slate-200">30</td>
+                  </tr>
+                  <tr>
+                    <td class="py-2 text-left font-sans font-medium text-slate-300">Group B (Premium)</td>
+                    <td class="py-2">
+                      <input type="number" id="chi-o21" value="10" min="0" class="w-16 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-center text-amber-300 font-bold focus:border-blue-500 focus:outline-none" oninput="updateChi2Simulation()">
+                    </td>
+                    <td class="py-2">
+                      <input type="number" id="chi-o22" value="20" min="0" class="w-16 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-center text-amber-300 font-bold focus:border-blue-500 focus:outline-none" oninput="updateChi2Simulation()">
+                    </td>
+                    <td id="chi-r2" class="py-2 font-bold text-slate-200">30</td>
+                  </tr>
+                  <tr class="bg-slate-900/60 font-bold border-t border-slate-700 text-slate-300">
+                    <td class="py-2 text-left font-sans">Col Total (C<sub>j</sub>)</td>
+                    <td id="chi-c1" class="py-2 text-rose-300">30</td>
+                    <td id="chi-c2" class="py-2 text-emerald-300">30</td>
+                    <td id="chi-ntot" class="py-2 text-amber-400 font-extrabold text-sm">N = 60</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Expected Frequencies Table -->
+            <div class="pt-3 border-t border-slate-800/80">
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-xs text-slate-400 font-medium">Expected Under H<sub>0</sub> Independence: <code class="math-pill text-[10px]">E<sub>ij</sub> = (R<sub>i</sub> &times; C<sub>j</sub>) / N</code></span>
+                <span id="cochran-badge" class="text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700">Cochran: All E &ge; 5 (Valid)</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-xs font-mono text-center">
+                <div class="p-2 bg-slate-900/80 rounded border border-slate-800">
+                  <span class="text-[10px] text-slate-500 block">E<sub>11</sub></span>
+                  <span id="chi-e11" class="text-slate-300 font-bold">15.0</span>
+                </div>
+                <div class="p-2 bg-slate-900/80 rounded border border-slate-800">
+                  <span class="text-[10px] text-slate-500 block">E<sub>12</sub></span>
+                  <span id="chi-e12" class="text-slate-300 font-bold">15.0</span>
+                </div>
+                <div class="p-2 bg-slate-900/80 rounded border border-slate-800">
+                  <span class="text-[10px] text-slate-500 block">E<sub>21</sub></span>
+                  <span id="chi-e21" class="text-slate-300 font-bold">15.0</span>
+                </div>
+                <div class="p-2 bg-slate-900/80 rounded border border-slate-800">
+                  <span class="text-[10px] text-slate-500 block">E<sub>22</sub></span>
+                  <span id="chi-e22" class="text-slate-300 font-bold">15.0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Statistical Decision Panel -->
+          <div class="lg:col-span-6 bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col justify-between space-y-4">
+            <div>
+              <div class="flex justify-between items-center mb-3">
+                <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                  Statistical Test Result &amp; P-Value
+                </h3>
+                <span class="text-xs font-mono text-slate-400">&alpha; = 0.05 | df = 1</span>
+              </div>
+
+              <!-- Residual Contributions Breakdown -->
+              <div class="space-y-2 mb-4">
+                <span class="text-xs text-slate-400 block font-medium">Cell Chi-Square Contributions: <code class="math-pill text-[10px]">&sum; (O - E)&sup2; / E</code></span>
+                <div class="grid grid-cols-4 gap-2 text-center text-xs font-mono">
+                  <div class="p-2 bg-slate-900 rounded border border-slate-800">
+                    <span class="text-[10px] text-slate-500 block">Cell 1,1</span>
+                    <span id="chi-res11" class="text-amber-300 font-bold">+1.67</span>
+                  </div>
+                  <div class="p-2 bg-slate-900 rounded border border-slate-800">
+                    <span class="text-[10px] text-slate-500 block">Cell 1,2</span>
+                    <span id="chi-res12" class="text-amber-300 font-bold">+1.67</span>
+                  </div>
+                  <div class="p-2 bg-slate-900 rounded border border-slate-800">
+                    <span class="text-[10px] text-slate-500 block">Cell 2,1</span>
+                    <span id="chi-res21" class="text-amber-300 font-bold">+1.67</span>
+                  </div>
+                  <div class="p-2 bg-slate-900 rounded border border-slate-800">
+                    <span class="text-[10px] text-slate-500 block">Cell 2,2</span>
+                    <span id="chi-res22" class="text-amber-300 font-bold">+1.67</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Big Result Cards -->
+              <div class="grid grid-cols-2 gap-3 mb-4">
+                <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 text-center">
+                  <span class="text-[11px] text-slate-400 block">Calculated &chi;&sup2; Statistic</span>
+                  <span id="chi-stat-val" class="text-2xl font-black text-amber-400 font-mono">6.67</span>
+                  <span class="text-[10px] text-slate-500 block mt-0.5">Critical &chi;&sup2;<sub>0.05</sub> = 3.841</span>
+                </div>
+                <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 text-center">
+                  <span class="text-[11px] text-slate-400 block">Asymptotic P-Value</span>
+                  <span id="chi-pval-val" class="text-2xl font-black text-rose-400 font-mono">0.0098</span>
+                  <span class="text-[10px] text-slate-500 block mt-0.5">Significance Threshold: 0.05</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Decision Banner -->
+            <div id="chi-decision-banner" class="p-3.5 rounded-xl border bg-emerald-950/60 border-emerald-500/50 text-emerald-300 text-xs flex items-center justify-between">
+              <div>
+                <strong class="font-bold text-sm block text-emerald-200">RETAIN FEATURE (Statistically Significant)</strong>
+                <span>Reject H<sub>0</sub> (p &lt; 0.05). Significant dependency between category and target.</span>
+              </div>
+              <span class="text-xl">✅</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: ANOVA F-TEST INTERACTIVE STUDIO -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-800">
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-wider text-amber-400">Module 1 • Continuous Feature vs Categorical Target</span>
+            <h2 class="text-xl font-bold text-white">One-Way ANOVA F-test Studio (<code class="font-mono text-blue-400">f_classif</code>)</h2>
+            <p class="text-sm text-slate-300">Decompose total variance into Between-Group Variance (MS<sub>B</sub>) and Within-Group Variance (MS<sub>W</sub>).</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xs text-slate-400 font-mono">F = MS<sub>B</sub> / MS<sub>W</sub></span>
+          </div>
+        </div>
+
+        <!-- SLIDERS & CANVAS -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-4 bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-4">
+            <h3 class="text-sm font-semibold text-white">ANOVA Parameters</h3>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-300">Between-Group Separation (&Delta;&mu;):</span>
+                <span id="anova-sep-val" class="font-mono font-bold text-amber-400">25.0</span>
+              </div>
+              <input type="range" id="anova-sep-slider" min="0" max="60" step="1" value="25" class="w-full cursor-pointer" oninput="updateAnovaSimulation()">
+              <p class="text-[10px] text-slate-500 mt-1">Controls distance between group class centroids &mu;<sub>1</sub>, &mu;<sub>2</sub>, &mu;<sub>3</sub>.</p>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-300">Within-Group Noise (&sigma;):</span>
+                <span id="anova-noise-val" class="font-mono font-bold text-rose-400">12.0</span>
+              </div>
+              <input type="range" id="anova-noise-slider" min="3" max="35" step="1" value="12" class="w-full cursor-pointer" oninput="updateAnovaSimulation()">
+              <p class="text-[10px] text-slate-500 mt-1">Variance of data points inside each respective class.</p>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-300">Sample Size per Group (n<sub>k</sub>):</span>
+                <span id="anova-n-val" class="font-mono font-bold text-blue-400">20</span>
+              </div>
+              <input type="range" id="anova-n-slider" min="5" max="50" step="5" value="20" class="w-full cursor-pointer" oninput="updateAnovaSimulation()">
+              <p class="text-[10px] text-slate-500 mt-1">Total samples N = 3 &times; n<sub>k</sub>.</p>
+            </div>
+
+            <!-- Calculated Variance Components -->
+            <div class="pt-3 border-t border-slate-800 space-y-2 text-xs font-mono">
+              <div class="flex justify-between">
+                <span class="text-slate-400">MS<sub>Between</sub> (Signal):</span>
+                <span id="anova-msb" class="text-amber-300 font-bold">1875.0</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">MS<sub>Within</sub> (Noise):</span>
+                <span id="anova-msw" class="text-slate-300 font-bold">144.0</span>
+              </div>
+              <div class="flex justify-between text-sm pt-1 border-t border-slate-800">
+                <span class="text-white font-bold">F-Ratio:</span>
+                <span id="anova-f-stat" class="text-emerald-400 font-extrabold text-base">13.02</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">P-Value:</span>
+                <span id="anova-pval" class="text-rose-400 font-bold">&lt; 0.0001</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Canvas 1: Density Curves & Jitter Plot -->
+          <div class="lg:col-span-8 bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
+            <div class="flex justify-between items-center mb-2">
+              <div class="flex items-center gap-4 text-xs">
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Class 0</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> Class 1</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Class 2</span>
+                <span class="text-slate-400 border-l border-slate-700 pl-3">Dashed line = Grand Mean</span>
+              </div>
+              <button onclick="updateAnovaSimulation()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded transition font-mono">
+                🎲 Resample Noise
+              </button>
+            </div>
+            <div class="relative w-full h-64 bg-slate-900/50 rounded-lg border border-slate-800/80 overflow-hidden">
+              <canvas id="canvas-anova" class="w-full h-full"></canvas>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-2">
+              <strong>Pedagogical Insight:</strong> When group distributions overlap heavily (high within-group noise &sigma;), MS<sub>W</sub> explodes, driving F towards 1.0. As group centroids separate, MS<sub>B</sub> dominates, making F surge and proving the feature's discriminative power.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: MUTUAL INFORMATION VS PEARSON CORRELATION & XOR BLIND SPOT -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Mutual Information vs Pearson -->
+        <div class="lg:col-span-7 bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+          <div class="flex justify-between items-start pb-3 border-b border-slate-800">
+            <div>
+              <span class="text-xs font-semibold uppercase tracking-wider text-amber-400">Non-Linearity Capture</span>
+              <h3 class="text-lg font-bold text-white">Mutual Information vs. Pearson Correlation</h3>
+            </div>
+            <div class="flex gap-1.5">
+              <button onclick="setMiPreset('linear')" class="px-2.5 py-1 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 rounded">Linear</button>
+              <button onclick="setMiPreset('parabola')" class="px-2.5 py-1 text-xs bg-blue-600 text-white rounded">Parabola</button>
+              <button onclick="setMiPreset('circle')" class="px-2.5 py-1 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 rounded">Circle</button>
+              <button onclick="setMiPreset('noise')" class="px-2.5 py-1 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 rounded">Pure Noise</button>
+            </div>
+          </div>
+
+          <div class="relative w-full h-56 bg-slate-950 rounded-xl border border-slate-800 overflow-hidden">
+            <canvas id="canvas-mi-pearson" class="w-full h-full"></canvas>
+          </div>
+
+          <!-- Comparison Metrics -->
+          <div class="grid grid-cols-3 gap-3 text-center">
+            <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+              <span class="text-[10px] text-slate-400 block">Pearson |r|</span>
+              <span id="mi-r-val" class="text-lg font-black text-rose-400 font-mono">0.02</span>
+              <span class="text-[9px] text-slate-500 block">Linear Slope</span>
+            </div>
+            <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+              <span class="text-[10px] text-slate-400 block">Mutual Information</span>
+              <span id="mi-score-val" class="text-lg font-black text-emerald-400 font-mono">0.68 nats</span>
+              <span class="text-[9px] text-slate-500 block">Entropy Reduction</span>
+            </div>
+            <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 flex flex-col justify-center">
+              <span class="text-[10px] text-slate-400 block">Verdict</span>
+              <span id="mi-verdict" class="text-xs font-bold text-amber-300">Pearson Blind!</span>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-400">
+            For quadratic relationships (<code class="math-pill text-[10px]">y = x&sup2;</code>), Pearson correlation cancels out to near zero. A naive linear filter would eliminate this feature, whereas Mutual Information recognizes the deterministic dependency.
+          </p>
+        </div>
+
+        <!-- The Univariate Blind Spot: XOR Problem -->
+        <div class="lg:col-span-5 bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+          <div class="pb-3 border-b border-slate-800">
+            <span class="text-xs font-semibold uppercase tracking-wider text-rose-400">The Univariate Trap</span>
+            <h3 class="text-lg font-bold text-white">The XOR Gate Blind Spot</h3>
+            <p class="text-xs text-slate-400">Why individual filter metrics fail on joint interactions.</p>
+          </div>
+
+          <div class="relative w-full h-56 bg-slate-950 rounded-xl border border-slate-800 overflow-hidden">
+            <canvas id="canvas-xor" class="w-full h-full"></canvas>
+          </div>
+
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2 text-xs">
+            <div class="flex justify-between font-mono">
+              <span class="text-slate-400">Score(X<sub>1</sub> &rarr; y):</span>
+              <span class="text-rose-400 font-bold">r = 0.00 | MI = 0.00 nats</span>
+            </div>
+            <div class="flex justify-between font-mono">
+              <span class="text-slate-400">Score(X<sub>2</sub> &rarr; y):</span>
+              <span class="text-rose-400 font-bold">r = 0.00 | MI = 0.00 nats</span>
+            </div>
+            <div class="p-2 bg-rose-950/40 rounded border border-rose-800/60 text-[11px] text-rose-200">
+              <strong>Fatal Flaw:</strong> Univariate filters evaluate each feature independently. In XOR, marginal distributions for class 0 and class 1 overlap 100%, causing the filter to discard both variables despite 100% joint separability!
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- MODULE 2: WRAPPER METHODS & COMBINATORIAL SEARCH -->
+    <!-- =================================================================== -->
+    <section id="tab-wrappers" class="tab-content hidden space-y-6">
+
+      <!-- SECTION 1: COMBINATORIAL EXPLOSION CALCULATOR -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-800">
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-wider text-amber-400">Module 2 • Search Space Complexity</span>
+            <h2 class="text-xl font-bold text-white">Combinatorial Explosion: 2<sup>P</sup> &minus; 1 Subsets</h2>
+            <p class="text-sm text-slate-300">Why exhaustive search (Best Subset Selection) is NP-hard and necessitates Greedy Heuristics (Forward / Backward / RFE).</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-5 bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-4">
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-300">Number of Candidate Features (P):</span>
+                <span id="comb-p-val" class="font-mono font-bold text-amber-400 text-base">15</span>
+              </div>
+              <input type="range" id="comb-p-slider" min="2" max="60" step="1" value="15" class="w-full cursor-pointer" oninput="updateCombinatorics()">
+              <div class="flex justify-between text-[10px] text-slate-500 mt-1">
+                <span>P=2</span>
+                <span>P=30</span>
+                <span>P=60</span>
+              </div>
+            </div>
+
+            <!-- Quick Presets -->
+            <div class="flex flex-wrap gap-2 pt-2">
+              <button onclick="setCombP(10)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-xs rounded text-slate-300">P = 10</button>
+              <button onclick="setCombP(20)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-xs rounded text-slate-300">P = 20</button>
+              <button onclick="setCombP(30)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-xs rounded text-slate-300">P = 30</button>
+              <button onclick="setCombP(50)" class="px-2.5 py-1 bg-rose-950 text-rose-300 border border-rose-800 text-xs rounded">P = 50 (Cosmic)</button>
+            </div>
+
+            <div class="p-4 bg-slate-900 rounded-xl border border-slate-800 space-y-3 font-mono text-xs">
+              <div>
+                <span class="text-slate-400 text-[10px] block">Exact Non-Empty Subsets: 2<sup>P</sup> &minus; 1</span>
+                <span id="comb-subsets-val" class="text-xl font-black text-amber-400 break-all">32,767</span>
+              </div>
+              <div class="pt-2 border-t border-slate-800">
+                <span class="text-slate-400 text-[10px] block">Compute Time @ 1,000 Model Fits/sec:</span>
+                <span id="comb-time-val" class="text-sm font-bold text-rose-400">32.8 seconds</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comparison Table: Exhaustive vs Greedy -->
+          <div class="lg:col-span-7 bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
+            <h3 class="text-sm font-semibold text-white mb-3">Algorithmic Search Complexity Comparison</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-800 text-slate-400">
+                    <th class="py-2">Search Strategy</th>
+                    <th class="py-2">Complexity</th>
+                    <th class="py-2">Fits for P=30</th>
+                    <th class="py-2">Feasibility</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800/60 font-mono text-slate-300">
+                  <tr>
+                    <td class="py-2.5 font-sans font-medium text-rose-300">Exhaustive Best Subset</td>
+                    <td class="py-2.5 text-rose-400">O(2<sup>P</sup>)</td>
+                    <td class="py-2.5 text-rose-400">1,073,741,823</td>
+                    <td class="py-2.5"><span class="px-2 py-0.5 rounded bg-rose-950 text-rose-400 text-[10px]">12.4 Days</span></td>
+                  </tr>
+                  <tr>
+                    <td class="py-2.5 font-sans font-medium text-blue-300">Forward Selection (SFS)</td>
+                    <td class="py-2.5 text-blue-400">O(P<sup>2</sup>)</td>
+                    <td class="py-2.5 text-blue-400">&asymp; 465</td>
+                    <td class="py-2.5"><span class="px-2 py-0.5 rounded bg-blue-950 text-blue-400 text-[10px]">&lt; 0.5 sec</span></td>
+                  </tr>
+                  <tr>
+                    <td class="py-2.5 font-sans font-medium text-emerald-300">Recursive Feature Elim. (RFE)</td>
+                    <td class="py-2.5 text-emerald-400">O(P) steps</td>
+                    <td class="py-2.5 text-emerald-400">30 fits</td>
+                    <td class="py-2.5"><span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 text-[10px]">&lt; 0.05 sec</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="mt-4 p-3 bg-slate-900 rounded-lg border border-slate-800 text-[11px] text-slate-400">
+              <strong>Greedy Trade-Off:</strong> While Exhaustive search is guaranteed to find the globally optimal subset, its exponential complexity makes it physically impossible beyond P &ge; 40. RFE and SFS make locally optimal greedy choices, finishing in polynomial time.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: RECURSIVE FEATURE ELIMINATION (RFE) STEPPER -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-800">
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-wider text-amber-400">Interactive Backward Pruning</span>
+            <h2 class="text-xl font-bold text-white">Recursive Feature Elimination (RFE) Interactive Stepper</h2>
+            <p class="text-sm text-slate-300">Watch the model prune the lowest absolute weight |&beta;<sub>j</sub>|, refit on remaining features, and construct the ranking vector.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="stepRFE()" id="btn-rfe-step" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition shadow flex items-center gap-2">
+              <span>▶</span> Step: Eliminate Lowest Feature
+            </button>
+            <button onclick="resetRFE()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition">
+              Reset
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Live Bar Chart of Current Weights -->
+          <div class="lg:col-span-7 bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
+            <div class="flex justify-between items-center mb-3">
+              <h3 class="text-sm font-semibold text-white">Current Model Weights |&beta;<sub>j</sub>|</h3>
+              <span id="rfe-step-label" class="text-xs font-mono text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800">Iteration 1 / 5 (P = 6)</span>
+            </div>
+            <div class="relative w-full h-64 bg-slate-900/50 rounded-lg border border-slate-800 overflow-hidden">
+              <canvas id="canvas-rfe-bars" class="w-full h-full"></canvas>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-2">
+              Red bar indicates the candidate with the smallest magnitude, targeted for pruning in the next step. Notice how remaining coefficients adapt upon refitting!
+            </p>
+          </div>
+
+          <!-- Feature Tracking & State Table -->
+          <div class="lg:col-span-5 bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-4">
+            <h3 class="text-sm font-semibold text-white">RFE Output Attributes</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-800 text-slate-400">
+                    <th class="py-1.5">Feature</th>
+                    <th class="py-1.5">True Nature</th>
+                    <th class="py-1.5 text-center">ranking_</th>
+                    <th class="py-1.5 text-center">support_</th>
+                  </tr>
+                </thead>
+                <tbody id="rfe-table-body" class="divide-y divide-slate-800/60 font-mono">
+                  <!-- Populated dynamically via JS -->
+                </tbody>
+              </table>
+            </div>
+
+            <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 space-y-1 text-xs">
+              <div class="text-slate-400">Active Surviving Features: <span id="rfe-surviving-count" class="text-white font-bold font-mono">6 / 6</span></div>
+              <div class="text-slate-400">Pruning Target: <span class="text-amber-300 font-bold">Top k = 2 Features</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: RFECV PERFORMANCE CURVE -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-3 border-b border-slate-800">
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-wider text-emerald-400">Automated Number of Features</span>
+            <h3 class="text-lg font-bold text-white">RFECV Scoring Curve: Finding Optimal k<sup>*</sup></h3>
+            <p class="text-xs text-slate-300">Cross-validation score vs. number of features selected, identifying the peak before overfitting or plateauing.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <label class="text-xs text-slate-400">Dataset Noise Level:</label>
+            <input type="range" id="rfecv-noise-slider" min="1" max="10" value="4" class="w-28 cursor-pointer" oninput="updateRFECV()">
+          </div>
+        </div>
+
+        <div class="relative w-full h-60 bg-slate-950 rounded-xl border border-slate-800 overflow-hidden">
+          <canvas id="canvas-rfecv" class="w-full h-full"></canvas>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          <div class="p-3 bg-slate-950 rounded-lg border border-slate-800">
+            <span class="text-slate-400 block">Optimal Features (k<sup>*</sup>):</span>
+            <span id="rfecv-k-opt" class="text-xl font-bold text-amber-400 font-mono">3 Features</span>
+          </div>
+          <div class="p-3 bg-slate-950 rounded-lg border border-slate-800">
+            <span class="text-slate-400 block">Peak Mean CV ROC-AUC:</span>
+            <span id="rfecv-peak-score" class="text-xl font-bold text-emerald-400 font-mono">0.884</span>
+          </div>
+          <div class="p-3 bg-slate-950 rounded-lg border border-slate-800 flex flex-col justify-center">
+            <span class="text-slate-400 block">Pruning Verdict:</span>
+            <span class="text-slate-200">Avoids under-fitting (k &lt; 3) &amp; noise bloat (k &gt; 3).</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- MODULE 3: EMBEDDED MODELS & TREE IMPORTANCE TRAPS -->
+    <!-- =================================================================== -->
+    <section id="tab-embedded" class="tab-content hidden space-y-6">
+
+      <!-- SECTION 1: REGULARIZATION GEOMETRY: L1 LASSO VS L2 RIDGE -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-800">
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-wider text-amber-400">Module 3 • Geometric Sparsity Proof</span>
+            <h2 class="text-xl font-bold text-white">L<sub>1</sub> Lasso (Diamond) vs. L<sub>2</sub> Ridge (Circle) Optimization Geometry</h2>
+            <p class="text-sm text-slate-300">Visual proof of why L<sub>1</sub> regularization forces exact zero coefficients while L<sub>2</sub> only shrinks them.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="setRegularizationMode('lasso')" id="btn-mode-lasso" class="px-3.5 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold transition shadow">
+              L1 Lasso (Diamond)
+            </button>
+            <button onclick="setRegularizationMode('ridge')" id="btn-mode-ridge" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium transition">
+              L2 Ridge (Circle)
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-8 bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
+            <div class="flex justify-between items-center mb-2 text-xs">
+              <span class="text-slate-400">Parameter Plane (w<sub>1</sub>, w<sub>2</sub>) with RSS Loss Contours</span>
+              <span id="lasso-tangent-readout" class="font-mono text-emerald-400 font-bold">Solution: w1 = 1.65, w2 = 0.00 (SPARSE!)</span>
+            </div>
+            <div class="relative w-full h-80 bg-slate-900/50 rounded-lg border border-slate-800 overflow-hidden">
+              <canvas id="canvas-lasso-geometry" class="w-full h-full"></canvas>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-2">
+              <strong>Geometric Principle:</strong> The L<sub>1</sub> norm &Vert;w&Vert;<sub>1</sub> &le; t forms a sharp polytope whose corners lie squarely on the coordinate axes. As the elliptical RSS contours expand from the unconstrained OLS minimum, they touch a sharp corner with high mathematical probability, forcing <code class="text-amber-300 font-bold font-mono">w<sub>2</sub> = 0.0</code>!
+            </p>
+          </div>
+
+          <div class="lg:col-span-4 bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-4">
+            <h3 class="text-sm font-semibold text-white">Regularization Controls</h3>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-300">Penalty Strength (&lambda;):</span>
+                <span id="lasso-lambda-val" class="font-mono font-bold text-amber-400">0.45</span>
+              </div>
+              <input type="range" id="lasso-lambda-slider" min="0.05" max="1.50" step="0.05" value="0.45" class="w-full cursor-pointer" oninput="updateLassoSimulation()">
+              <div class="flex justify-between text-[10px] text-slate-500 mt-1">
+                <span>Low &lambda; (Loose)</span>
+                <span>High &lambda; (Sparse)</span>
+              </div>
+            </div>
+
+            <!-- Dynamic Coefficient Readouts -->
+            <div class="p-4 bg-slate-900 rounded-xl border border-slate-800 space-y-3 font-mono text-xs">
+              <div class="flex justify-between items-center">
+                <span class="text-slate-400">Weight w<sub>1</sub>:</span>
+                <span id="lasso-w1-val" class="text-sm font-bold text-blue-400">1.65</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-slate-400">Weight w<sub>2</sub>:</span>
+                <span id="lasso-w2-val" class="text-sm font-bold text-rose-400">0.00</span>
+              </div>
+              <div class="pt-2 border-t border-slate-800 text-[11px]">
+                <span class="text-slate-400 block mb-1">Feature Selection Status:</span>
+                <span id="lasso-status-badge" class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 font-sans font-semibold text-[10px]">
+                  Feature X2 Eliminated (Zero Weight)
+                </span>
+              </div>
+            </div>
+
+            <!-- Preprocessing Prerequisite Warning -->
+            <div class="p-3 bg-amber-950/40 rounded-xl border border-amber-800/60 text-[11px] text-amber-200/90 leading-relaxed">
+              <strong>Mandatory Prerequisite:</strong> StandardScaler is mandatory before Lasso! Unscaled features with large raw ranges receive disproportionately heavy penalization, causing accidental elimination.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: HIGH-CARDINALITY TRAP VS PERMUTATION IMPORTANCE -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-800">
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-wider text-rose-400">The Overfitting Trap</span>
+            <h2 class="text-xl font-bold text-white">Tree MDI High-Cardinality Trap vs. Permutation Importance</h2>
+            <p class="text-sm text-slate-300">Witness how Mean Decrease in Impurity (MDI) deceptively ranks random ID noise as #1, and how Permutation Importance unmasks it.</p>
+          </div>
+          <button onclick="triggerPermutationShuffle()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition shadow flex items-center gap-2">
+            <span>🔀</span> Execute Permutation Shuffling
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Training MDI Card -->
+          <div class="bg-slate-950 p-5 rounded-xl border border-rose-900/40 space-y-4">
+            <div class="flex justify-between items-center">
+              <h3 class="text-sm font-bold text-rose-400 flex items-center gap-2">
+                <span>⚠️</span> In-Sample MDI (<code class="font-mono text-xs">feature_importances_</code>)
+              </h3>
+              <span class="text-[10px] bg-rose-950 text-rose-300 px-2 py-0.5 rounded border border-rose-800">Evaluated on Train Set</span>
+            </div>
+
+            <div class="space-y-3 font-mono text-xs">
+              <div>
+                <div class="flex justify-between text-slate-300 mb-1">
+                  <span>Random Customer UUID (Pure Noise):</span>
+                  <span class="font-bold text-rose-400">58.4% (Rank #1)</span>
+                </div>
+                <div class="w-full bg-slate-900 rounded-full h-3 overflow-hidden">
+                  <div class="bg-rose-500 h-full rounded-full transition-all duration-500" style="width: 58.4%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-slate-300 mb-1">
+                  <span>Account Balance (Real Signal):</span>
+                  <span class="font-bold text-blue-400">26.1% (Rank #2)</span>
+                </div>
+                <div class="w-full bg-slate-900 rounded-full h-3 overflow-hidden">
+                  <div class="bg-blue-500 h-full rounded-full transition-all duration-500" style="width: 26.1%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-slate-300 mb-1">
+                  <span>Age Group (Real Signal):</span>
+                  <span class="font-bold text-amber-400">15.5% (Rank #3)</span>
+                </div>
+                <div class="w-full bg-slate-900 rounded-full h-3 overflow-hidden">
+                  <div class="bg-amber-500 h-full rounded-full transition-all duration-500" style="width: 15.5%"></div>
+                </div>
+              </div>
+            </div>
+
+            <p class="text-[11px] text-slate-400 pt-2 border-t border-slate-800">
+              <strong>The Flaw:</strong> High-cardinality variables offer thousands of arbitrary candidate split thresholds. Greedy trees exploit these to memorize the training set, falsely inflating MDI.
+            </p>
+          </div>
+
+          <!-- Out-of-Sample Permutation Importance Card -->
+          <div class="bg-slate-950 p-5 rounded-xl border border-emerald-900/40 space-y-4">
+            <div class="flex justify-between items-center">
+              <h3 class="text-sm font-bold text-emerald-400 flex items-center gap-2">
+                <span>🛡️</span> Permutation Importance (<code class="font-mono text-xs">permutation_importance</code>)
+              </h3>
+              <span class="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-800">Evaluated on Validation Set</span>
+            </div>
+
+            <div class="space-y-3 font-mono text-xs">
+              <div>
+                <div class="flex justify-between text-slate-300 mb-1">
+                  <span>Account Balance (Real Signal):</span>
+                  <span class="font-bold text-emerald-400">+0.142 ROC-AUC Drop</span>
+                </div>
+                <div class="w-full bg-slate-900 rounded-full h-3 overflow-hidden">
+                  <div class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 75%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-slate-300 mb-1">
+                  <span>Age Group (Real Signal):</span>
+                  <span class="font-bold text-emerald-400">+0.086 ROC-AUC Drop</span>
+                </div>
+                <div class="w-full bg-slate-900 rounded-full h-3 overflow-hidden">
+                  <div class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 45%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-slate-300 mb-1">
+                  <span>Random Customer UUID (Pure Noise):</span>
+                  <span id="perm-uuid-score" class="font-bold text-slate-500">-0.002 (Zero Drop)</span>
+                </div>
+                <div class="w-full bg-slate-900 rounded-full h-3 overflow-hidden">
+                  <div id="perm-uuid-bar" class="bg-slate-600 h-full rounded-full transition-all duration-500" style="width: 1%"></div>
+                </div>
+              </div>
+            </div>
+
+            <p class="text-[11px] text-slate-400 pt-2 border-t border-slate-800">
+              <strong>The Remedy:</strong> By breaking the link between UUID and the target on unseen holdout data, the validation score does not drop (&Delta;Score &le; 0), exposing the noise variable!
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- MODULE 4: PRODUCTION PIPELINES & FREEDMAN'S PARADOX -->
+    <!-- =================================================================== -->
+    <section id="tab-pipelines" class="tab-content hidden space-y-6">
+
+      <!-- SECTION 1: FREEDMAN'S PARADOX MONTE CARLO SIMULATION -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-800">
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-wider text-rose-400">Selection Leakage Hazard</span>
+            <h2 class="text-xl font-bold text-white">Freedman's Paradox (1983) Monte Carlo Simulation</h2>
+            <p class="text-sm text-slate-300">
+              Proof that selecting features prior to cross-validation manufactures statistically significant relationships from pure random Gaussian noise.
+            </p>
+          </div>
+          <button onclick="runFreedmanSimulation()" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-bold transition shadow flex items-center gap-2">
+            <span>⚡</span> Run Monte Carlo Noise Experiment
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Controls & Extreme Value Formula -->
+          <div class="lg:col-span-5 bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-4">
+            <h3 class="text-sm font-semibold text-white">Simulation Setup</h3>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-300">Observations (N):</span>
+                <span id="freedman-n-val" class="font-mono font-bold text-amber-400">50</span>
+              </div>
+              <input type="range" id="freedman-n-slider" min="20" max="200" step="10" value="50" class="w-full cursor-pointer" oninput="updateFreedmanFormula()">
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-300">Noise Features (P):</span>
+                <span id="freedman-p-val" class="font-mono font-bold text-blue-400">200</span>
+              </div>
+              <input type="range" id="freedman-p-slider" min="50" max="2000" step="50" value="200" class="w-full cursor-pointer" oninput="updateFreedmanFormula()">
+            </div>
+
+            <div class="p-4 bg-slate-900 rounded-xl border border-slate-800 space-y-2 text-xs font-mono">
+              <span class="text-slate-400 block text-[10px]">Extreme Value Theory Asymptotic Bound:</span>
+              <div class="text-amber-300 font-bold text-sm">
+                E[max |r<sub>j</sub>|] &asymp; &radic;(2 &middot; ln(P) / N)
+              </div>
+              <div class="flex justify-between pt-2 border-t border-slate-800 text-slate-300">
+                <span>Theoretical Peak Correlation:</span>
+                <span id="freedman-theor-r" class="font-bold text-rose-400">0.460</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>Simulated Max Sample |r|:</span>
+                <span id="freedman-emp-r" class="font-bold text-amber-400">0.448</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empirical Histogram Canvas -->
+          <div class="lg:col-span-7 bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="text-sm font-semibold text-white">Empirical Correlation Distribution (P Pure Noise Features)</h3>
+              <span class="text-[10px] text-slate-400 font-mono">True Population &rho; = 0.0</span>
+            </div>
+            <div class="relative w-full h-60 bg-slate-900/50 rounded-lg border border-slate-800 overflow-hidden">
+              <canvas id="canvas-freedman" class="w-full h-full"></canvas>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-2">
+              Red needle marks the maximum observed sample correlation. Due to finite sample variance, selecting top features unconditionally picks these extreme fluctuations!
+            </p>
+          </div>
+        </div>
+
+        <!-- Flawed vs Honest Pipeline Comparison -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+          <div class="p-4 rounded-xl border bg-rose-950/30 border-rose-800/50 space-y-2">
+            <div class="flex justify-between items-center text-xs font-bold text-rose-300">
+              <span>❌ Flawed Workflow: Pre-Selection Leakage</span>
+              <span class="text-sm">Fake CV: 86.4%</span>
+            </div>
+            <p class="text-[11px] text-rose-200/80">
+              1. Select top 5 features across entire dataset (N=50).<br>
+              2. Perform 5-Fold Cross-Validation on selected 5 features.<br>
+              <strong>Catastrophic Result:</strong> CV reports 86.4% ROC-AUC, but evaluating on fresh test data collapses to <strong>50.2% (Random Guess)</strong>!
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl border bg-emerald-950/30 border-emerald-800/50 space-y-2">
+            <div class="flex justify-between items-center text-xs font-bold text-emerald-300">
+              <span>✅ Honest Workflow: Isolated in Pipeline</span>
+              <span class="text-sm">Honest CV: 50.4%</span>
+            </div>
+            <p class="text-[11px] text-emerald-200/80">
+              1. Wrap Selector and Classifier in <code class="math-pill text-emerald-300">sklearn.pipeline.Pipeline</code>.<br>
+              2. Selection algorithm fits strictly inside each training fold.<br>
+              <strong>Honest Result:</strong> CV truthfully reports ~50.4%, alertly identifying that the dataset contains zero real predictive signal.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: THE MULTI-STAGE HYBRID FUNNEL -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-800">
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-wider text-amber-400">Enterprise Architecture</span>
+            <h2 class="text-xl font-bold text-white">The Multi-Stage Hybrid Selection Funnel</h2>
+            <p class="text-sm text-slate-300">How enterprise ML systems combine Fast Filters, Embedded Sparsity, and Wrapper Refinement to handle tens of thousands of features.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xs text-slate-400">Raw Input Scale:</span>
+            <input type="range" id="funnel-p-slider" min="1000" max="50000" step="1000" value="10000" class="w-32 cursor-pointer" oninput="updateFunnelSimulation()">
+            <span id="funnel-p-val" class="text-xs font-mono font-bold text-blue-400">10,000</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <!-- Stage 1 -->
+          <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-3 relative overflow-hidden">
+            <div class="flex justify-between items-center text-xs">
+              <span class="px-2 py-0.5 rounded bg-blue-950 text-blue-300 font-mono font-semibold">Stage 1: Fast Filter</span>
+              <span class="text-slate-400 font-mono">O(NP)</span>
+            </div>
+            <h3 class="text-base font-bold text-white">High-Throughput Triage</h3>
+            <p class="text-xs text-slate-300">Eliminates 95% of obvious noise features in seconds using univariate ANOVA / Chi-Squared.</p>
+            <div class="p-3 bg-slate-900 rounded-lg font-mono text-xs space-y-1">
+              <div class="flex justify-between text-slate-400">
+                <span>Features Passed:</span>
+                <span id="funnel-s1-out" class="text-blue-400 font-bold">500</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Execution Time:</span>
+                <span class="text-emerald-400 font-bold">&lt; 5 seconds</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stage 2 -->
+          <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-3 relative overflow-hidden">
+            <div class="flex justify-between items-center text-xs">
+              <span class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 font-mono font-semibold">Stage 2: Embedded Model</span>
+              <span class="text-slate-400 font-mono">1 Single Fit</span>
+            </div>
+            <h3 class="text-base font-bold text-white">Multivariate Interactions</h3>
+            <p class="text-xs text-slate-300">Captures feature redundancy and interactions via L1 Regularization (Lasso) or LightGBM early stopping.</p>
+            <div class="p-3 bg-slate-900 rounded-lg font-mono text-xs space-y-1">
+              <div class="flex justify-between text-slate-400">
+                <span>Features Passed:</span>
+                <span id="funnel-s2-out" class="text-amber-400 font-bold">50</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Execution Time:</span>
+                <span class="text-emerald-400 font-bold">&asymp; 45 seconds</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stage 3 -->
+          <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-3 relative overflow-hidden">
+            <div class="flex justify-between items-center text-xs">
+              <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 font-mono font-semibold">Stage 3: Wrapper Fine-Tune</span>
+              <span class="text-slate-400 font-mono">CV Target Metric</span>
+            </div>
+            <h3 class="text-base font-bold text-white">Production Optimal Subset</h3>
+            <p class="text-xs text-slate-300">Fine-tunes the exact optimal subset k* using RFECV with target business evaluation metric.</p>
+            <div class="p-3 bg-slate-900 rounded-lg font-mono text-xs space-y-1">
+              <div class="flex justify-between text-slate-400">
+                <span>Final Serving Set:</span>
+                <span class="text-emerald-400 font-bold">15 - 20 Features</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Execution Time:</span>
+                <span class="text-emerald-400 font-bold">&asymp; 2.5 minutes</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-4 bg-slate-950 rounded-xl border border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
+          <div>
+            <span class="text-slate-400 block">Total Pipeline Computation Time:</span>
+            <span class="text-base font-bold text-emerald-400 font-mono">~ 3.5 Minutes</span>
+          </div>
+          <div class="text-right">
+            <span class="text-slate-400 block">Naive Full Wrapper Search on Raw Data:</span>
+            <span class="text-base font-bold text-rose-400 font-mono">~ 18.5 Days (&gt; 7,500&times; Slower)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: GRAND STRATEGY DECISION MATRIX -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <h3 class="text-lg font-bold text-white">Grand Strategy Decision Matrix (Lesson 08)</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-400">
+                <th class="py-2.5">Problem Scenario</th>
+                <th class="py-2.5">Data Characteristic</th>
+                <th class="py-2.5">Recommended Technique</th>
+                <th class="py-2.5">Scikit-Learn Implementation</th>
+                <th class="py-2.5">Critical Precaution</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60 font-mono text-slate-300">
+              <tr>
+                <td class="py-2 font-sans font-medium text-white">Ultra-High Dimensionality (P &gt; 10k)</td>
+                <td class="py-2 font-sans text-slate-400">Continuous X, Categorical y</td>
+                <td class="py-2 text-blue-300 font-sans">ANOVA F-test</td>
+                <td class="py-2 text-amber-300">SelectKBest(f_classif, k=100)</td>
+                <td class="py-2 font-sans text-slate-400">Univariate only (misses XOR)</td>
+              </tr>
+              <tr>
+                <td class="py-2 font-sans font-medium text-white">Categorical Document Frequencies</td>
+                <td class="py-2 font-sans text-slate-400">Discrete X &ge; 0, Categorical y</td>
+                <td class="py-2 text-blue-300 font-sans">Chi-Squared (&chi;&sup2;)</td>
+                <td class="py-2 text-amber-300">SelectKBest(chi2, k=50)</td>
+                <td class="py-2 font-sans text-rose-300">Requires MinMaxScaler (X &ge; 0)</td>
+              </tr>
+              <tr>
+                <td class="py-2 font-sans font-medium text-white">Unknown Non-Linear Relations</td>
+                <td class="py-2 font-sans text-slate-400">Arbitrary distributions</td>
+                <td class="py-2 text-emerald-300 font-sans">Mutual Information</td>
+                <td class="py-2 text-amber-300">mutual_info_classif / regression</td>
+                <td class="py-2 font-sans text-slate-400">k-NN estimate is compute heavy</td>
+              </tr>
+              <tr>
+                <td class="py-2 font-sans font-medium text-white">Linear Collinear Predictors</td>
+                <td class="py-2 font-sans text-slate-400">Standardized numbers</td>
+                <td class="py-2 text-emerald-300 font-sans">L1 Regularization</td>
+                <td class="py-2 text-amber-300">LassoCV(cv=5)</td>
+                <td class="py-2 font-sans text-rose-300">StandardScaler is mandatory</td>
+              </tr>
+              <tr>
+                <td class="py-2 font-sans font-medium text-white">Tree Ensemble Pruning</td>
+                <td class="py-2 font-sans text-slate-400">Tabular with high cardinality</td>
+                <td class="py-2 text-emerald-300 font-sans">Permutation Importance</td>
+                <td class="py-2 text-amber-300">permutation_importance(model, X_val, y_val)</td>
+                <td class="py-2 font-sans text-slate-400">Never evaluate on train set</td>
+              </tr>
+              <tr>
+                <td class="py-2 font-sans font-medium text-white">Production Deployment</td>
+                <td class="py-2 font-sans text-slate-400">Automated Pipeline</td>
+                <td class="py-2 text-blue-300 font-sans">Cross-Validation Pipeline</td>
+                <td class="py-2 text-amber-300">Pipeline([('sel', ...), ('clf', ...)])</td>
+                <td class="py-2 font-sans text-emerald-300">Zero Leakage Isolation</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-slate-950 border-t border-slate-800 py-6 text-center text-xs text-slate-500">
+    <p>DataPreVisual Interactive Laboratory &bull; Faculty of Mathematical Economics, National Economics University (NEU)</p>
+    <p class="mt-1">Compatible with Scikit-Learn 1.4+ &bull; Certified Zero-Leakage Educational Suite</p>
+  </footer>
+
+  <script>
+    // ==========================================
+    // TAB NAVIGATION
+    // ==========================================
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('tab-active');
+        btn.classList.add('text-slate-400');
+      });
+
+      const activeSection = document.getElementById(tabId);
+      if (activeSection) activeSection.classList.remove('hidden');
+
+      const activeBtn = document.getElementById('btn-' + tabId);
+      if (activeBtn) {
+        activeBtn.classList.add('tab-active');
+        activeBtn.classList.remove('text-slate-400');
+      }
+
+      // Resize and re-render active canvases
+      setTimeout(() => {
+        if (tabId === 'tab-filters') {
+          drawAnovaCanvas();
+          drawMiPearsonCanvas();
+          drawXorCanvas();
+        } else if (tabId === 'tab-wrappers') {
+          drawRfeBars();
+          drawRfecvCanvas();
+        } else if (tabId === 'tab-embedded') {
+          drawLassoGeometry();
+        } else if (tabId === 'tab-pipelines') {
+          drawFreedmanCanvas();
+        }
+      }, 50);
+    }
+
+    // ==========================================
+    // MODULE 1: CHI-SQUARED SIMULATION
+    // ==========================================
+    function loadChi2Preset(preset) {
+      if (preset === 'telecom') {
+        document.getElementById('chi-o11').value = 20;
+        document.getElementById('chi-o12').value = 10;
+        document.getElementById('chi-o21').value = 10;
+        document.getElementById('chi-o22').value = 20;
+      } else if (preset === 'loan') {
+        document.getElementById('chi-o11').value = 30;
+        document.getElementById('chi-o12').value = 10;
+        document.getElementById('chi-o21').value = 10;
+        document.getElementById('chi-o22').value = 30;
+      } else if (preset === 'independent') {
+        document.getElementById('chi-o11').value = 15;
+        document.getElementById('chi-o12').value = 15;
+        document.getElementById('chi-o21').value = 15;
+        document.getElementById('chi-o22').value = 15;
+      }
+      updateChi2Simulation();
+    }
+
+    function updateChi2Simulation() {
+      const o11 = Math.max(0, parseFloat(document.getElementById('chi-o11').value) || 0);
+      const o12 = Math.max(0, parseFloat(document.getElementById('chi-o12').value) || 0);
+      const o21 = Math.max(0, parseFloat(document.getElementById('chi-o21').value) || 0);
+      const o22 = Math.max(0, parseFloat(document.getElementById('chi-o22').value) || 0);
+
+      const r1 = o11 + o12;
+      const r2 = o21 + o22;
+      const c1 = o11 + o21;
+      const c2 = o12 + o22;
+      const n = r1 + r2;
+
+      document.getElementById('chi-r1').innerText = r1;
+      document.getElementById('chi-r2').innerText = r2;
+      document.getElementById('chi-c1').innerText = c1;
+      document.getElementById('chi-c2').innerText = c2;
+      document.getElementById('chi-ntot').innerText = 'N = ' + n;
+
+      if (n === 0) return;
+
+      const e11 = (r1 * c1) / n;
+      const e12 = (r1 * c2) / n;
+      const e21 = (r2 * c1) / n;
+      const e22 = (r2 * c2) / n;
+
+      document.getElementById('chi-e11').innerText = e11.toFixed(1);
+      document.getElementById('chi-e12').innerText = e12.toFixed(1);
+      document.getElementById('chi-e21').innerText = e21.toFixed(1);
+      document.getElementById('chi-e22').innerText = e22.toFixed(1);
+
+      const cochranPass = (e11 >= 5 && e12 >= 5 && e21 >= 5 && e22 >= 5);
+      const cochranBadge = document.getElementById('cochran-badge');
+      if (cochranPass) {
+        cochranBadge.className = 'text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700';
+        cochranBadge.innerText = 'Cochran: All E \u2265 5 (Valid)';
+      } else {
+        cochranBadge.className = 'text-[10px] px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-700';
+        cochranBadge.innerText = 'Cochran Warning: E < 5';
+      }
+
+      const res11 = e11 > 0 ? Math.pow(o11 - e11, 2) / e11 : 0;
+      const res12 = e12 > 0 ? Math.pow(o12 - e12, 2) / e12 : 0;
+      const res21 = e21 > 0 ? Math.pow(o21 - e21, 2) / e21 : 0;
+      const res22 = e22 > 0 ? Math.pow(o22 - e22, 2) / e22 : 0;
+
+      document.getElementById('chi-res11').innerText = '+' + res11.toFixed(2);
+      document.getElementById('chi-res12').innerText = '+' + res12.toFixed(2);
+      document.getElementById('chi-res21').innerText = '+' + res21.toFixed(2);
+      document.getElementById('chi-res22').innerText = '+' + res22.toFixed(2);
+
+      const chiStat = res11 + res12 + res21 + res22;
+      document.getElementById('chi-stat-val').innerText = chiStat.toFixed(2);
+
+      // Approximate P-value for df = 1: P = 1 - erf(sqrt(chi)/sqrt(2))
+      const z = Math.sqrt(chiStat);
+      const pval = Math.max(0.00001, 1 - erf(z / Math.SQRT2));
+      document.getElementById('chi-pval-val').innerText = pval < 0.0001 ? '< 0.0001' : pval.toFixed(4);
+
+      const decision = document.getElementById('chi-decision-banner');
+      if (chiStat >= 3.841) {
+        decision.className = 'p-3.5 rounded-xl border bg-emerald-950/60 border-emerald-500/50 text-emerald-300 text-xs flex items-center justify-between';
+        decision.innerHTML = `<div><strong class="font-bold text-sm block text-emerald-200">RETAIN FEATURE (Statistically Significant)</strong><span>Reject H<sub>0</sub> (p < 0.05). Significant dependency between category and target.</span></div><span class="text-xl">✅</span>`;
+      } else {
+        decision.className = 'p-3.5 rounded-xl border bg-slate-900 border-slate-700 text-slate-400 text-xs flex items-center justify-between';
+        decision.innerHTML = `<div><strong class="font-bold text-sm block text-slate-300">DISCARD FEATURE (Statistically Independent)</strong><span>Fail to reject H<sub>0</sub> (p &ge; 0.05). Feature does not carry discriminative signal.</span></div><span class="text-xl">⚪</span>`;
+      }
+    }
+
+    // Error function approximation
+    function erf(x) {
+      const a1 =  0.254829592, a2 = -0.284496736, a3 =  1.421413741;
+      const a4 = -1.453152027, a5 =  1.061405429, p  =  0.3275911;
+      const sign = x < 0 ? -1 : 1;
+      x = Math.abs(x);
+      const t = 1.0 / (1.0 + p * x);
+      const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+      return sign * y;
+    }
+
+    // ==========================================
+    // MODULE 1: ANOVA SIMULATION & CANVAS
+    // ==========================================
+    let anovaPoints = [];
+
+    function updateAnovaSimulation() {
+      const sep = parseFloat(document.getElementById('anova-sep-slider').value);
+      const noise = parseFloat(document.getElementById('anova-noise-slider').value);
+      const n = parseInt(document.getElementById('anova-n-slider').value);
+
+      document.getElementById('anova-sep-val').innerText = sep.toFixed(1);
+      document.getElementById('anova-noise-val').innerText = noise.toFixed(1);
+      document.getElementById('anova-n-val').innerText = n;
+
+      // Group centroids
+      const m0 = 50 - sep;
+      const m1 = 50;
+      const m2 = 50 + sep;
+      const grandMean = (m0 + m1 + m2) / 3;
+
+      // Generate points
+      anovaPoints = [];
+      let ssW = 0;
+
+      for (let k = 0; k < 3; k++) {
+        const mean = (k === 0) ? m0 : (k === 1) ? m1 : m2;
+        for (let i = 0; i < n; i++) {
+          const val = mean + gaussianRandom(0, noise);
+          anovaPoints.push({ group: k, val: val });
+          ssW += Math.pow(val - mean, 2);
+        }
+      }
+
+      const ssB = n * (Math.pow(m0 - grandMean, 2) + Math.pow(m1 - grandMean, 2) + Math.pow(m2 - grandMean, 2));
+      const dfB = 2;
+      const dfW = 3 * n - 3;
+      const msB = ssB / dfB;
+      const msW = Math.max(0.001, ssW / dfW);
+      const fStat = msB / msW;
+
+      document.getElementById('anova-msb').innerText = msB.toFixed(1);
+      document.getElementById('anova-msw').innerText = msW.toFixed(1);
+      document.getElementById('anova-f-stat').innerText = fStat.toFixed(2);
+      document.getElementById('anova-pval').innerText = fStat > 20 ? '< 0.0001' : (1 / (1 + fStat * 0.5)).toFixed(4);
+
+      drawAnovaCanvas();
+    }
+
+    function gaussianRandom(mean = 0, stdev = 1) {
+      let u = 1 - Math.random();
+      let v = Math.random();
+      let z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+      return z * stdev + mean;
+    }
+
+    function drawAnovaCanvas() {
+      const canvas = document.getElementById('canvas-anova');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+
+      const w = rect.width;
+      const h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const sep = parseFloat(document.getElementById('anova-sep-slider').value);
+      const noise = parseFloat(document.getElementById('anova-noise-slider').value);
+      const m0 = 50 - sep;
+      const m1 = 50;
+      const m2 = 50 + sep;
+
+      // Coordinate mapping [ -20 to 120 ]
+      const minX = -10, maxX = 110;
+      const toX = val => ((val - minX) / (maxX - minX)) * (w - 60) + 30;
+
+      // Draw Grid lines
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1;
+      for (let x = 0; x <= 100; x += 20) {
+        ctx.beginPath();
+        ctx.moveTo(toX(x), 20);
+        ctx.lineTo(toX(x), h - 40);
+        ctx.stroke();
+        ctx.fillStyle = '#64748b';
+        ctx.font = '10px monospace';
+        ctx.fillText(x, toX(x) - 6, h - 25);
+      }
+
+      // Draw Bell Curves for 3 groups
+      const colors = ['#3b82f6', '#f59e0b', '#10b981'];
+      const means = [m0, m1, m2];
+
+      means.forEach((m, idx) => {
+        ctx.strokeStyle = colors[idx];
+        ctx.fillStyle = colors[idx] + '25';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+
+        const peakY = 60;
+        const baselineY = h - 60;
+
+        for (let px = 0; px < w; px += 2) {
+          const dataX = minX + (px - 30) / (w - 60) * (maxX - minX);
+          const pdf = Math.exp(-0.5 * Math.pow((dataX - m) / noise, 2));
+          const py = baselineY - pdf * 80;
+          if (px === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+        ctx.lineTo(w, baselineY);
+        ctx.lineTo(0, baselineY);
+        ctx.fill();
+
+        // Mean line
+        ctx.strokeStyle = colors[idx];
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(toX(m), 30);
+        ctx.lineTo(toX(m), baselineY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      });
+
+      // Grand Mean line
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(toX(50), 10);
+      ctx.lineTo(toX(50), h - 40);
+      ctx.stroke();
+
+      // Draw Jitter Points
+      anovaPoints.forEach(pt => {
+        const px = toX(pt.val);
+        const py = h - 55 + (pt.group * 8) - (Math.random() * 4);
+        ctx.fillStyle = colors[pt.group];
+        ctx.beginPath();
+        ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    // ==========================================
+    // MODULE 1: MUTUAL INFORMATION VS PEARSON
+    // ==========================================
+    let currentMiPreset = 'parabola';
+
+    function setMiPreset(preset) {
+      currentMiPreset = preset;
+      drawMiPearsonCanvas();
+    }
+
+    function drawMiPearsonCanvas() {
+      const canvas = document.getElementById('canvas-mi-pearson');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+
+      const w = rect.width;
+      const h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      // Generate points based on preset
+      const n = 150;
+      let points = [];
+      let sumX = 0, sumY = 0;
+
+      for (let i = 0; i < n; i++) {
+        let x, y;
+        if (currentMiPreset === 'linear') {
+          x = (i / n) * 2 - 1;
+          y = x + (Math.random() - 0.5) * 0.35;
+        } else if (currentMiPreset === 'parabola') {
+          x = (i / n) * 2 - 1;
+          y = 2.5 * (x * x) - 0.8 + (Math.random() - 0.5) * 0.25;
+        } else if (currentMiPreset === 'circle') {
+          const angle = (i / n) * Math.PI * 2;
+          const r = 0.75 + (Math.random() - 0.5) * 0.2;
+          x = r * Math.cos(angle);
+          y = r * Math.sin(angle);
+        } else {
+          x = (Math.random() - 0.5) * 1.8;
+          y = (Math.random() - 0.5) * 1.8;
+        }
+        points.push({ x, y });
+        sumX += x;
+        sumY += y;
+      }
+
+      const meanX = sumX / n;
+      const meanY = sumY / n;
+      let num = 0, denX = 0, denY = 0;
+      points.forEach(p => {
+        num += (p.x - meanX) * (p.y - meanY);
+        denX += Math.pow(p.x - meanX, 2);
+        denY += Math.pow(p.y - meanY, 2);
+      });
+      const r = denX > 0 && denY > 0 ? num / Math.sqrt(denX * denY) : 0;
+
+      let mi = 0;
+      if (currentMiPreset === 'linear') mi = 0.85;
+      else if (currentMiPreset === 'parabola') mi = 0.68;
+      else if (currentMiPreset === 'circle') mi = 0.55;
+      else mi = 0.03;
+
+      document.getElementById('mi-r-val').innerText = Math.abs(r).toFixed(2);
+      document.getElementById('mi-score-val').innerText = mi.toFixed(2) + ' nats';
+
+      const verdict = document.getElementById('mi-verdict');
+      if (currentMiPreset === 'parabola' || currentMiPreset === 'circle') {
+        verdict.className = 'text-xs font-bold text-rose-400';
+        verdict.innerText = 'Pearson Blind!';
+      } else if (currentMiPreset === 'linear') {
+        verdict.className = 'text-xs font-bold text-emerald-400';
+        verdict.innerText = 'Both Detect';
+      } else {
+        verdict.className = 'text-xs font-bold text-slate-400';
+        verdict.innerText = 'Pure Noise';
+      }
+
+      // Draw Axes
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(w / 2, 10);
+      ctx.lineTo(w / 2, h - 10);
+      ctx.moveTo(10, h / 2);
+      ctx.lineTo(w - 10, h / 2);
+      ctx.stroke();
+
+      // Render Points
+      const toCanvasX = x => w / 2 + x * (w * 0.42);
+      const toCanvasY = y => h / 2 - y * (h * 0.42);
+
+      ctx.fillStyle = '#38bdf8';
+      points.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(toCanvasX(p.x), toCanvasY(p.y), 3, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    function drawXorCanvas() {
+      const canvas = document.getElementById('canvas-xor');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+
+      const w = rect.width;
+      const h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      // 4 Quadrants: (0,0)->Class 0, (1,1)->Class 0, (0,1)->Class 1, (1,0)->Class 1
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(w / 2, 10);
+      ctx.lineTo(w / 2, h - 10);
+      ctx.moveTo(10, h / 2);
+      ctx.lineTo(w - 10, h / 2);
+      ctx.stroke();
+
+      const clusters = [
+        { cx: -0.5, cy: -0.5, label: 0, color: '#3b82f6' },
+        { cx:  0.5, cy:  0.5, label: 0, color: '#3b82f6' },
+        { cx: -0.5, cy:  0.5, label: 1, color: '#ef4444' },
+        { cx:  0.5, cy: -0.5, label: 1, color: '#ef4444' },
+      ];
+
+      clusters.forEach(c => {
+        for (let i = 0; i < 25; i++) {
+          const px = w / 2 + (c.cx + (Math.random() - 0.5) * 0.35) * (w * 0.7);
+          const py = h / 2 - (c.cy + (Math.random() - 0.5) * 0.35) * (h * 0.7);
+          ctx.fillStyle = c.color;
+          ctx.beginPath();
+          ctx.arc(px, py, 3.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+    }
+
+    // ==========================================
+    // MODULE 2: COMBINATORICS & RFE
+    // ==========================================
+    function setCombP(val) {
+      document.getElementById('comb-p-slider').value = val;
+      updateCombinatorics();
+    }
+
+    function updateCombinatorics() {
+      const p = parseInt(document.getElementById('comb-p-slider').value);
+      document.getElementById('comb-p-val').innerText = p;
+
+      let subsetsStr = '';
+      if (p <= 52) {
+        const num = Math.pow(2, p) - 1;
+        subsetsStr = num.toLocaleString();
+      } else {
+        subsetsStr = (Math.pow(2, p) - 1).toExponential(3);
+      }
+      document.getElementById('comb-subsets-val').innerText = subsetsStr;
+
+      // Seconds at 1000 fits/sec
+      const sec = Math.pow(2, p) / 1000;
+      let timeStr = '';
+      if (sec < 60) timeStr = sec.toFixed(1) + ' seconds';
+      else if (sec < 3600) timeStr = (sec / 60).toFixed(1) + ' minutes';
+      else if (sec < 86400) timeStr = (sec / 3600).toFixed(1) + ' hours';
+      else if (sec < 31536000) timeStr = (sec / 86400).toFixed(1) + ' days';
+      else timeStr = (sec / 31536000).toExponential(2) + ' YEARS!';
+
+      document.getElementById('comb-time-val').innerText = timeStr;
+    }
+
+    // RFE State Machine
+    const rfeInitialFeatures = [
+      { name: 'X1 (Annual Income)', trueNature: 'Strong Signal', baseWeight: 3.20, active: true, rank: 1 },
+      { name: 'X2 (Credit Score)', trueNature: 'Strong Signal', baseWeight: 2.10, active: true, rank: 1 },
+      { name: 'X3 (Employment Length)', trueNature: 'Moderate Signal', baseWeight: 1.40, active: true, rank: 1 },
+      { name: 'X4 (Home Ownership)', trueNature: 'Weak Signal', baseWeight: 0.65, active: true, rank: 1 },
+      { name: 'X5 (Zip Code Digits)', trueNature: 'Near Noise', baseWeight: 0.22, active: true, rank: 1 },
+      { name: 'X6 (Random UUID)', trueNature: 'Pure Noise', baseWeight: 0.05, active: true, rank: 1 },
+    ];
+
+    let rfeFeatures = JSON.parse(JSON.stringify(rfeInitialFeatures));
+    let rfeCurrentStep = 1;
+
+    function resetRFE() {
+      rfeFeatures = JSON.parse(JSON.stringify(rfeInitialFeatures));
+      rfeCurrentStep = 1;
+      updateRFETable();
+      drawRfeBars();
+    }
+
+    function stepRFE() {
+      const activeFeats = rfeFeatures.filter(f => f.active);
+      if (activeFeats.length <= 2) return;
+
+      // Find min weight
+      let minFeat = activeFeats[0];
+      activeFeats.forEach(f => {
+        if (Math.abs(f.baseWeight) < Math.abs(minFeat.baseWeight)) minFeat = f;
+      });
+
+      minFeat.active = false;
+      minFeat.rank = activeFeats.length; // rank matches elimination round
+
+      // Simulate weight re-adaptation
+      rfeFeatures.filter(f => f.active).forEach(f => {
+        f.baseWeight += (Math.random() - 0.4) * 0.15;
+      });
+
+      rfeCurrentStep++;
+      updateRFETable();
+      drawRfeBars();
+    }
+
+    function updateRFETable() {
+      const tbody = document.getElementById('rfe-table-body');
+      tbody.innerHTML = '';
+
+      rfeFeatures.forEach(f => {
+        const tr = document.createElement('tr');
+        tr.className = f.active ? 'text-slate-200' : 'text-slate-500 bg-slate-900/30';
+        tr.innerHTML = `
+          <td class="py-1.5 font-sans">${f.name}</td>
+          <td class="py-1.5 text-slate-400 font-sans">${f.trueNature}</td>
+          <td class="py-1.5 text-center font-bold ${f.rank === 1 ? 'text-emerald-400' : 'text-amber-400'}">Rank ${f.rank}</td>
+          <td class="py-1.5 text-center font-bold ${f.active ? 'text-emerald-400' : 'text-slate-600'}">${f.active ? 'True' : 'False'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const activeCount = rfeFeatures.filter(f => f.active).length;
+      document.getElementById('rfe-surviving-count').innerText = `${activeCount} / 6`;
+      document.getElementById('rfe-step-label').innerText = `Iteration ${rfeCurrentStep} / 5 (Remaining P = ${activeCount})`;
+
+      const btn = document.getElementById('btn-rfe-step');
+      if (activeCount <= 2) {
+        btn.disabled = true;
+        btn.className = 'px-4 py-2 bg-slate-800 text-slate-500 rounded-lg text-xs font-bold cursor-not-allowed';
+      } else {
+        btn.disabled = false;
+        btn.className = 'px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition shadow';
+      }
+    }
+
+    function drawRfeBars() {
+      const canvas = document.getElementById('canvas-rfe-bars');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+
+      const w = rect.width;
+      const h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const activeFeats = rfeFeatures.filter(f => f.active);
+      let minFeat = activeFeats.length > 0 ? activeFeats[0] : null;
+      activeFeats.forEach(f => {
+        if (Math.abs(f.baseWeight) < Math.abs(minFeat.baseWeight)) minFeat = f;
+      });
+
+      const barHeight = (h - 40) / rfeFeatures.length;
+      const maxW = 3.6;
+
+      rfeFeatures.forEach((f, idx) => {
+        const y = 20 + idx * barHeight;
+        const barW = (Math.abs(f.baseWeight) / maxW) * (w - 180);
+
+        ctx.fillStyle = '#64748b';
+        ctx.font = '10px sans-serif';
+        ctx.fillText(f.name.split(' ')[0], 10, y + barHeight * 0.65);
+
+        if (f.active) {
+          ctx.fillStyle = (f === minFeat && activeFeats.length > 2) ? '#ef4444' : '#0ea5e9';
+          ctx.fillRect(80, y + 2, barW, barHeight - 6);
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '10px monospace';
+          ctx.fillText(f.baseWeight.toFixed(2), 90 + barW, y + barHeight * 0.65);
+        } else {
+          ctx.strokeStyle = '#334155';
+          ctx.setLineDash([2, 2]);
+          ctx.strokeRect(80, y + 2, 20, barHeight - 6);
+          ctx.setLineDash([]);
+          ctx.fillStyle = '#64748b';
+          ctx.font = '9px monospace';
+          ctx.fillText('[PRUNED]', 110, y + barHeight * 0.65);
+        }
+      });
+    }
+
+    function updateRFECV() {
+      drawRfecvCanvas();
+    }
+
+    function drawRfecvCanvas() {
+      const canvas = document.getElementById('canvas-rfecv');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+
+      const w = rect.width;
+      const h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const noise = parseInt(document.getElementById('rfecv-noise-slider').value);
+      const kOpt = 3;
+      document.getElementById('rfecv-k-opt').innerText = `${kOpt} Features`;
+
+      // Scoring curve points for k = 1 to 10
+      const scores = [0.65, 0.81, 0.884, 0.880, 0.875, 0.865, 0.852, 0.840, 0.832, 0.825];
+      const adjustedScores = scores.map((s, idx) => s - (idx > 2 ? (noise - 4) * 0.008 * (idx - 2) : 0));
+
+      const toX = k => ((k - 1) / 9) * (w - 80) + 40;
+      const toY = s => h - 30 - ((s - 0.5) / 0.45) * (h - 60);
+
+      // Shaded std dev band
+      ctx.fillStyle = 'rgba(14, 165, 233, 0.15)';
+      ctx.beginPath();
+      adjustedScores.forEach((s, idx) => {
+        const x = toX(idx + 1);
+        const y = toY(s + 0.025);
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      for (let i = adjustedScores.length - 1; i >= 0; i--) {
+        const x = toX(i + 1);
+        const y = toY(adjustedScores[i] - 0.025);
+        ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fill();
+
+      // Plot line
+      ctx.strokeStyle = '#0ea5e9';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      adjustedScores.forEach((s, idx) => {
+        const x = toX(idx + 1);
+        const y = toY(s);
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      // Peak Marker
+      const peakX = toX(kOpt);
+      const peakY = toY(adjustedScores[kOpt - 1]);
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.arc(peakX, peakY, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Drop dashed line
+      ctx.strokeStyle = '#f59e0b';
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(peakX, peakY);
+      ctx.lineTo(peakX, h - 30);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Axis labels
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px monospace';
+      for (let k = 1; k <= 10; k++) {
+        ctx.fillText('k=' + k, toX(k) - 8, h - 12);
+      }
+    }
+
+    // ==========================================
+    // MODULE 3: EMBEDDED LASSO / RIDGE GEOMETRY
+    // ==========================================
+    let regMode = 'lasso';
+
+    function setRegularizationMode(mode) {
+      regMode = mode;
+      document.getElementById('btn-mode-lasso').className = mode === 'lasso'
+        ? 'px-3.5 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold transition shadow'
+        : 'px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium transition';
+      document.getElementById('btn-mode-ridge').className = mode === 'ridge'
+        ? 'px-3.5 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold transition shadow'
+        : 'px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium transition';
+      updateLassoSimulation();
+    }
+
+    function updateLassoSimulation() {
+      const lambda = parseFloat(document.getElementById('lasso-lambda-slider').value);
+      document.getElementById('lasso-lambda-val').innerText = lambda.toFixed(2);
+
+      let w1, w2;
+      if (regMode === 'lasso') {
+        w1 = Math.max(0, 2.20 - lambda * 1.2);
+        w2 = Math.max(0, 1.10 - lambda * 2.5); // Hits 0 fast!
+      } else {
+        w1 = 2.20 / (1 + lambda);
+        w2 = 1.10 / (1 + lambda); // Never hits 0
+      }
+
+      document.getElementById('lasso-w1-val').innerText = w1.toFixed(2);
+      document.getElementById('lasso-w2-val').innerText = w2.toFixed(2);
+
+      const badge = document.getElementById('lasso-status-badge');
+      const readout = document.getElementById('lasso-tangent-readout');
+
+      if (w2 === 0) {
+        badge.className = 'px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 font-sans font-semibold text-[10px]';
+        badge.innerText = 'Feature X2 Eliminated (Zero Weight)';
+        readout.className = 'font-mono text-emerald-400 font-bold';
+        readout.innerText = `Solution: w1 = ${w1.toFixed(2)}, w2 = 0.00 (SPARSE!)`;
+      } else {
+        badge.className = 'px-2 py-0.5 rounded bg-blue-950 text-blue-300 font-sans font-semibold text-[10px]';
+        badge.innerText = 'Both Features Active (No Sparsity)';
+        readout.className = 'font-mono text-blue-400 font-bold';
+        readout.innerText = `Solution: w1 = ${w1.toFixed(2)}, w2 = ${w2.toFixed(2)}`;
+      }
+
+      drawLassoGeometry();
+    }
+
+    function drawLassoGeometry() {
+      const canvas = document.getElementById('canvas-lasso-geometry');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+
+      const w = rect.width;
+      const h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const cx = w * 0.35;
+      const cy = h * 0.65;
+      const scale = 70;
+
+      // Axes
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cx, 10);
+      ctx.lineTo(cx, h - 10);
+      ctx.moveTo(10, cy);
+      ctx.lineTo(w - 10, cy);
+      ctx.stroke();
+
+      const lambda = parseFloat(document.getElementById('lasso-lambda-slider').value);
+      const budget = Math.max(0.2, 1.8 - lambda * 0.9);
+
+      // Draw Constraint Region
+      if (regMode === 'lasso') {
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.2)';
+        ctx.strokeStyle = '#3b82f6';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(cx + budget * scale, cy);
+        ctx.lineTo(cx, cy - budget * scale);
+        ctx.lineTo(cx - budget * scale, cy);
+        ctx.lineTo(cx, cy + budget * scale);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.2)';
+        ctx.strokeStyle = '#3b82f6';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, budget * scale, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      // Unconstrained OLS Minimum
+      const olsX = cx + 2.2 * scale;
+      const olsY = cy - 1.1 * scale;
+
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.arc(olsX, olsY, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillText('OLS (w*)', olsX + 8, olsY - 6);
+
+      // RSS Elliptical Contours
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 1.2;
+      for (let r = 0.5; r <= 2.2; r += 0.45) {
+        ctx.beginPath();
+        ctx.ellipse(olsX, olsY, r * scale * 1.2, r * scale * 0.7, -Math.PI / 6, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Active Solution marker
+      const w1 = parseFloat(document.getElementById('lasso-w1-val').innerText);
+      const w2 = parseFloat(document.getElementById('lasso-w2-val').innerText);
+      const solX = cx + w1 * scale;
+      const solY = cy - w2 * scale;
+
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath();
+      ctx.arc(solX, solY, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    function triggerPermutationShuffle() {
+      const bar = document.getElementById('perm-uuid-bar');
+      const score = document.getElementById('perm-uuid-score');
+      bar.style.width = '0%';
+      score.innerText = '-0.005 (Noise Confirmed!)';
+      score.className = 'font-bold text-rose-400 font-mono';
+    }
+
+    // ==========================================
+    // MODULE 4: FREEDMAN'S PARADOX & FUNNEL
+    // ==========================================
+    let freedmanCorrs = [];
+
+    function updateFreedmanFormula() {
+      const n = parseInt(document.getElementById('freedman-n-slider').value);
+      const p = parseInt(document.getElementById('freedman-p-slider').value);
+      document.getElementById('freedman-n-val').innerText = n;
+      document.getElementById('freedman-p-val').innerText = p;
+
+      const theorR = Math.sqrt((2 * Math.log(p)) / n);
+      document.getElementById('freedman-theor-r').innerText = theorR.toFixed(3);
+    }
+
+    function runFreedmanSimulation() {
+      const n = parseInt(document.getElementById('freedman-n-slider').value);
+      const p = parseInt(document.getElementById('freedman-p-slider').value);
+
+      freedmanCorrs = [];
+      let maxR = 0;
+
+      for (let j = 0; j < p; j++) {
+        let sumX = 0, sumY = 0;
+        let xs = [], ys = [];
+        for (let i = 0; i < n; i++) {
+          const x = gaussianRandom(0, 1);
+          const y = Math.random() > 0.5 ? 1 : 0;
+          xs.push(x);
+          ys.push(y);
+          sumX += x;
+          sumY += y;
+        }
+        const mx = sumX / n, my = sumY / n;
+        let num = 0, denX = 0, denY = 0;
+        for (let i = 0; i < n; i++) {
+          num += (xs[i] - mx) * (ys[i] - my);
+          denX += Math.pow(xs[i] - mx, 2);
+          denY += Math.pow(ys[i] - my, 2);
+        }
+        const r = denX > 0 && denY > 0 ? Math.abs(num / Math.sqrt(denX * denY)) : 0;
+        freedmanCorrs.push(r);
+        if (r > maxR) maxR = r;
+      }
+
+      document.getElementById('freedman-emp-r').innerText = maxR.toFixed(3);
+      drawFreedmanCanvas();
+    }
+
+    function drawFreedmanCanvas() {
+      const canvas = document.getElementById('canvas-freedman');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+
+      const w = rect.width;
+      const h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      if (freedmanCorrs.length === 0) {
+        ctx.fillStyle = '#64748b';
+        ctx.font = '12px sans-serif';
+        ctx.fillText('Click "Run Monte Carlo Noise Experiment" to simulate.', 40, h / 2);
+        return;
+      }
+
+      // Histogram bins [0 to 0.7] in 25 bins
+      const bins = new Array(25).fill(0);
+      const binWidth = 0.7 / 25;
+      let maxCount = 0;
+
+      freedmanCorrs.forEach(r => {
+        const binIdx = Math.min(24, Math.floor(r / binWidth));
+        bins[binIdx]++;
+        if (bins[binIdx] > maxCount) maxCount = bins[binIdx];
+      });
+
+      const toX = r => (r / 0.7) * (w - 60) + 30;
+      const barW = ((w - 60) / 25) - 2;
+
+      // Draw Histogram
+      bins.forEach((count, idx) => {
+        const rVal = idx * binWidth;
+        const x = toX(rVal);
+        const barH = (count / maxCount) * (h - 50);
+        const y = h - 30 - barH;
+
+        ctx.fillStyle = '#3b82f6';
+        ctx.fillRect(x, y, barW, barH);
+      });
+
+      // Max correlation needle
+      const maxEmp = parseFloat(document.getElementById('freedman-emp-r').innerText);
+      const needleX = toX(maxEmp);
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(needleX, 15);
+      ctx.lineTo(needleX, h - 30);
+      ctx.stroke();
+
+      ctx.fillStyle = '#ef4444';
+      ctx.font = '10px monospace';
+      ctx.fillText(`Max |r| = ${maxEmp.toFixed(3)}`, needleX - 45, 25);
+    }
+
+    function updateFunnelSimulation() {
+      const p = parseInt(document.getElementById('funnel-p-slider').value);
+      document.getElementById('funnel-p-val').innerText = p.toLocaleString();
+      document.getElementById('funnel-s1-out').innerText = Math.round(p * 0.05).toLocaleString();
+      document.getElementById('funnel-s2-out').innerText = Math.round(p * 0.005).toLocaleString();
+    }
+
+    // INITIALIZATION ON LOAD
+    window.addEventListener('DOMContentLoaded', () => {
+      updateChi2Simulation();
+      updateAnovaSimulation();
+      updateCombinatorics();
+      resetRFE();
+      updateRFECV();
+      updateLassoSimulation();
+      updateFreedmanFormula();
+      runFreedmanSimulation();
+      updateFunnelSimulation();
+      setMiPreset('parabola');
+    });
+  </script>
+</body>
+</html>

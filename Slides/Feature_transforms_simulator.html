@@ -1,0 +1,2231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DataPreVisual: Feature Scaling & Data Transformations Interactive Laboratory</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    :root {
+      --neu-blue: #084C90;
+      --neu-navy: #052C52;
+      --neu-red: #AE152D;
+      --neu-gold: #F8C008;
+      --dpv-teal: #0A8080;
+    }
+    .bg-neu-navy { background-color: var(--neu-navy); }
+    .bg-neu-blue { background-color: var(--neu-blue); }
+    .text-neu-gold { color: var(--neu-gold); }
+    .text-neu-blue { color: var(--neu-blue); }
+    .text-neu-red { color: var(--neu-red); }
+    .border-neu-blue { border-color: var(--neu-blue); }
+    .border-neu-gold { border-color: var(--neu-gold); }
+    .tab-active {
+      background-color: var(--neu-blue);
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(8, 76, 144, 0.4);
+    }
+    canvas {
+      image-rendering: -webkit-optimize-contrast;
+      user-select: none;
+    }
+    input[type=range] {
+      accent-color: var(--neu-blue);
+    }
+    .math-pill {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(51, 65, 85, 0.7);
+      padding: 0.15rem 0.5rem;
+      border-radius: 0.375rem;
+    }
+    .interactive-badge {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .interactive-badge:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased flex flex-col font-sans">
+
+  <!-- HEADER -->
+  <header class="bg-gradient-to-r from-[#052C52] via-[#084C90] to-[#052C52] border-b border-amber-400/30 px-6 py-4 shadow-2xl">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-amber-400 flex items-center justify-center font-bold text-[#052C52] text-xl shadow-lg border border-amber-300">
+          DPV
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs tracking-wider uppercase font-semibold text-amber-300">National Economics University • Faculty of Mathematical Economics</span>
+          </div>
+          <h1 class="text-xl md:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+            Feature Scaling & Data Transformations Interactive Laboratory
+          </h1>
+          <p class="text-xs text-slate-300">Live Mathematical Intuition • Distribution Morphing • Scikit-Learn 1.4+ • Zero-Leakage Architecture</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 text-xs">
+        <span class="px-3 py-1 bg-white/10 rounded-full border border-white/20 text-slate-200">Interactive Visual Sandbox</span>
+        <span class="px-3 py-1 bg-emerald-500/20 text-emerald-300 rounded-full border border-emerald-500/40 font-mono">Real-time Reactive Engine</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- NAVIGATION BAR (PRESERVING MODULE ORDER 1, 2, 3, 4) -->
+  <nav class="bg-slate-900/90 border-b border-slate-800 sticky top-0 z-50 backdrop-blur px-6 py-2.5">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex flex-wrap gap-2">
+        <button onclick="switchTab('tab-scaling')" id="btn-tab-scaling" class="tab-btn px-4 py-2 rounded-lg text-sm transition-all duration-200 tab-active">
+          Module 1: Numerical Scaling & Loss Contours
+        </button>
+        <button onclick="switchTab('tab-categorical')" id="btn-tab-categorical" class="tab-btn px-4 py-2 rounded-lg text-sm transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800">
+          Module 2: Categorical Dummy Trap & Bayesian Shrinkage
+        </button>
+        <button onclick="switchTab('tab-distribution')" id="btn-tab-distribution" class="tab-btn px-4 py-2 rounded-lg text-sm transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800">
+          Module 3: Distribution Morphing & Log/Box-Cox Deep Dive
+        </button>
+        <button onclick="switchTab('tab-advanced')" id="btn-tab-advanced" class="tab-btn px-4 py-2 rounded-lg text-sm transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800">
+          Module 4: Advanced Discretization & Target Inversion
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN VIEWPORT -->
+  <main class="flex-1 max-w-7xl mx-auto w-full p-6 space-y-8">
+
+    <!-- =================================================================== -->
+    <!-- MODULE 1: NUMERICAL FEATURE SCALING & LOSS CONTOURS -->
+    <!-- =================================================================== -->
+    <section id="tab-scaling" class="tab-content space-y-6">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-800">
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-wider text-amber-400">Module 1 • Geometric & Numerical Foundation</span>
+            <h2 class="text-xl font-bold text-white">MinMaxScaler vs. StandardScaler vs. RobustScaler</h2>
+            <p class="text-sm text-slate-300">Compare sensitivity to extreme outliers and simulate how scaling cures Gradient Descent oscillations.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="loadScalingPreset('outlier')" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-medium transition shadow">
+              Extreme Outlier: [10, 20, 30, 40, 1000]
+            </button>
+            <button onclick="loadScalingPreset('uniform')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-medium transition shadow">
+              Uniform Scale: [20, 35, 50, 65, 80]
+            </button>
+            <button onclick="loadScalingPreset('moderate')" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-medium transition shadow">
+              Moderate Outlier: [15, 25, 35, 45, 500]
+            </button>
+          </div>
+        </div>
+
+        <!-- CONTROLS & PARAMS -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mt-5">
+          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+            <label class="block text-xs font-medium text-slate-300 mb-1">Inlier Observations (CSV):</label>
+            <input type="text" id="scaling-inliers-input" value="10, 20, 30, 40" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-amber-300 font-mono" onchange="updateScalingSimulation()">
+            <p class="text-[11px] text-slate-400 mt-1">Normal observations within typical operational bounds.</p>
+          </div>
+
+          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+            <div class="flex justify-between items-center mb-1">
+              <label class="text-xs font-medium text-slate-300">Outlier Sample Magnitude:</label>
+              <span id="scaling-outlier-val" class="text-xs font-mono font-bold text-rose-400 bg-rose-950/60 px-2 py-0.5 rounded border border-rose-800">1000.0</span>
+            </div>
+            <input type="range" id="scaling-outlier-slider" min="50" max="3000" step="10" value="1000" class="w-full cursor-pointer accent-blue-500" oninput="document.getElementById('scaling-outlier-val').innerText = parseFloat(this.value).toFixed(1); updateScalingSimulation()">
+            <div class="flex justify-between text-[10px] text-slate-500 mt-1">
+              <span>50 (Mild)</span>
+              <span>1000 (Default)</span>
+              <span>3000 (Severe)</span>
+            </div>
+          </div>
+
+          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-medium text-slate-300">MinMaxScaler clip:</label>
+              <input type="checkbox" id="scaling-clip-checkbox" class="rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer" onchange="updateScalingSimulation()">
+            </div>
+            <div class="flex items-center justify-between mt-2">
+              <label class="text-xs font-medium text-slate-300">Test Extrapolation Sample:</label>
+              <input type="number" id="scaling-test-sample" value="95" class="w-20 bg-slate-900 border border-slate-700 rounded px-2 py-0.5 text-xs text-emerald-400 font-mono text-right" onchange="updateScalingSimulation()">
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1">Testing future test payload beyond training support.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISUAL COMPARISON 1D CANVAS & 2D GRADIENT DESCENT LOSS CONTOURS -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- 1D Tracks Canvas -->
+        <div class="lg:col-span-7 bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> 1D Feature Tracks: Inlier Squashing vs. Robust Preservation
+              </h3>
+              <span class="text-xs text-slate-400">Scale Comparison</span>
+            </div>
+            <div class="h-[360px] bg-slate-950 rounded-xl border border-slate-800 p-2 relative">
+              <canvas id="canvas-scaling" width="640" height="340" class="w-full h-full"></canvas>
+            </div>
+          </div>
+          <div class="grid grid-cols-4 gap-2 mt-3 pt-3 border-t border-slate-800 text-[11px] text-center">
+            <div class="flex items-center gap-1.5 justify-center"><span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span><span class="text-slate-300">Raw</span></div>
+            <div class="flex items-center gap-1.5 justify-center"><span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span><span class="text-blue-300">MinMax</span></div>
+            <div class="flex items-center gap-1.5 justify-center"><span class="w-2.5 h-2.5 rounded-full bg-purple-400"></span><span class="text-purple-300">Standard</span></div>
+            <div class="flex items-center gap-1.5 justify-center"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span><span class="text-emerald-300">Robust</span></div>
+          </div>
+        </div>
+
+        <!-- 2D Loss Contour Simulator -->
+        <div class="lg:col-span-5 bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> Gradient Descent: Unscaled vs. Scaled
+              </h3>
+              <div class="flex items-center gap-2">
+                <button onclick="runGradientDescentAnimation()" id="btn-gd-anim" class="px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 border border-amber-500/40 rounded text-[11px] font-bold transition flex items-center gap-1">
+                  <span>▶ Run Optimizer</span>
+                </button>
+              </div>
+            </div>
+            <p class="text-xs text-slate-400 mb-2">Click anywhere on the 2D surface to pick an initial starting weight $(w_1^{(0)}, w_2^{(0)})$!</p>
+            
+            <div class="h-[260px] bg-slate-950 rounded-xl border border-slate-800 p-2 cursor-pointer relative" onclick="setGDStartPoint(event)">
+              <canvas id="canvas-contour" width="360" height="240" class="w-full h-full"></canvas>
+            </div>
+
+            <!-- Optimizer Sliders -->
+            <div class="grid grid-cols-2 gap-3 mt-3">
+              <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-xs">
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-400">Learning Rate (η):</span>
+                  <span id="gd-lr-val" class="font-mono text-amber-400 font-bold">0.12</span>
+                </div>
+                <input type="range" id="gd-lr-slider" min="0.02" max="0.30" step="0.01" value="0.12" class="w-full accent-amber-400" oninput="document.getElementById('gd-lr-val').innerText = this.value; drawLossContour()">
+              </div>
+              <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-xs">
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-400">Condition κ(H):</span>
+                  <span id="gd-cond-val" class="font-mono text-rose-400 font-bold">16.0</span>
+                </div>
+                <input type="range" id="gd-cond-slider" min="2.0" max="30.0" step="1.0" value="16.0" class="w-full accent-rose-400" oninput="document.getElementById('gd-cond-val').innerText = this.value; drawLossContour()">
+              </div>
+            </div>
+          </div>
+
+          <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs space-y-1 mt-3">
+            <div class="flex justify-between">
+              <span class="text-slate-400">StandardScaler Inlier Window:</span>
+              <span id="stat-inlier-span" class="font-mono font-bold text-rose-400">0.077 σ (Squashed Inliers)</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">RobustScaler Breakdown Point:</span>
+              <span class="font-mono font-bold text-emerald-400">50% (Immune to Outlier)</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Extrapolated Test Point ($x=95$):</span>
+              <span id="stat-test-transform" class="font-mono font-bold text-blue-400">x* = 1.25</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- MODULE 2: CATEGORICAL ENCODING & TARGET ENCODER -->
+    <!-- =================================================================== -->
+    <section id="tab-categorical" class="tab-content hidden space-y-6">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl">
+        <span class="text-xs font-semibold uppercase tracking-wider text-amber-400">Module 2 • Categorical Feature Engineering</span>
+        <h2 class="text-xl font-bold text-white">OneHotEncoder (Dummy Trap) & Bayesian TargetEncoder</h2>
+        <p class="text-sm text-slate-300">Analyze the singular Gram matrix in OLS and simulate Bayesian m-estimate shrinkage preventing target leakage.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Sub-tool 2A: Dummy Variable Trap Matrix Inspector -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Dummy Variable Trap & Matrix Rank Inspector
+              </h3>
+              <span class="text-xs bg-rose-950/60 text-rose-300 px-2.5 py-0.5 rounded border border-rose-800 font-mono">Multicollinearity Sandbox</span>
+            </div>
+
+            <div class="my-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-medium text-slate-300">Drop Strategy:</label>
+                <div class="flex gap-2">
+                  <button onclick="setDummyStrategy('none')" id="btn-dummy-none" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs text-white transition">drop=None (Full 3 cols)</button>
+                  <button onclick="setDummyStrategy('first')" id="btn-dummy-first" class="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded text-xs text-white transition font-bold shadow">drop='first' (Drop Card)</button>
+                </div>
+              </div>
+
+              <!-- Matrix Display -->
+              <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 font-mono text-xs">
+                <div class="text-slate-400 text-[11px] mb-2 flex justify-between">
+                  <span>Design Matrix [Intercept (1) + Dummy Columns]:</span>
+                  <span id="dummy-status-pill" class="text-emerald-400 font-bold font-sans">Full Rank (Invertible)</span>
+                </div>
+                <div id="dummy-matrix-container" class="space-y-1 text-center"></div>
+              </div>
+
+              <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs text-slate-300 space-y-1.5">
+                <div class="flex justify-between">
+                  <span class="text-slate-400">Sum of Dummy Columns:</span>
+                  <span id="dummy-sum-check" class="font-mono text-amber-300 font-bold">d_Cash + d_Card + d_Ewallet = [1, 1, 1, 1]ᵀ</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-400">Gram Matrix det(XᵀX):</span>
+                  <span id="dummy-det-val" class="font-mono text-emerald-400 font-bold">det &gt; 0 (Invertible)</span>
+                </div>
+                <p id="dummy-explanation" class="text-[11px] text-slate-400 pt-1 border-t border-slate-800">
+                  With <code class="text-blue-300">drop='first'</code>, Card is the benchmark absorbed by β₀, guaranteeing full column rank for OLS normal equations.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-3 bg-amber-950/30 border border-amber-800/40 rounded-xl text-[11px] text-amber-200">
+            <strong>Production Rule:</strong> Unregularized linear models require <code class="bg-amber-900/40 px-1 py-0.5 rounded text-white">drop='first'</code>. Regularized models (L1/L2) and Trees should retain all columns (<code class="bg-amber-900/40 px-1 py-0.5 rounded text-white">drop=None</code>).
+          </div>
+        </div>
+
+                                <!-- Sub-tool 2B: Bayesian TargetEncoder Shrinkage -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Bayesian TargetEncoder Shrinkage (m-estimate)
+              </h3>
+              <span class="text-xs bg-emerald-950/60 text-emerald-300 px-2.5 py-0.5 rounded border border-emerald-800 font-mono">Empirical Bayes Tug-of-War</span>
+            </div>
+
+            <div class="my-4 space-y-3">
+              <div class="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                  <label class="block text-slate-400 mb-1">Global Target Mean (ȳ):</label>
+                  <input type="number" id="te-global-mean" value="0.50" step="0.05" min="0" max="1" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1 text-emerald-400 font-mono" onchange="updateTargetEncoder()">
+                </div>
+                <div>
+                  <label class="block text-slate-400 mb-1">Smoothing Weight (m):</label>
+                  <input type="number" id="te-m-smooth" value="2.0" step="0.5" min="0" max="20" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1 text-amber-400 font-mono" onchange="updateTargetEncoder()">
+                </div>
+              </div>
+
+              <!-- Interactive Scenario Inspector: Concrete Bank Loan Default Example -->
+              <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs space-y-2">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-1.5">
+                  <span class="font-bold text-white">Concrete Example: Bank Loan Default (Job &rarr; Risk):</span>
+                  <span class="text-[10px] text-slate-400">Formula: S_c = &lambda;_c &middot; ȳ_c + (1 - &lambda;_c) &middot; ȳ</span>
+                </div>
+                
+                <div class="space-y-1.5 font-mono text-[11px]">
+                  <div class="flex justify-between items-center p-1.5 rounded bg-slate-900/60">
+                    <div><span class="text-blue-400 font-bold">Developer</span> (n=3, ȳ_c=0.67):</div>
+                    <div>&lambda;=<span id="te-dev-lambda" class="text-emerald-300">0.600</span> &rarr; <span id="te-dev-res" class="text-amber-300 font-bold">S = 0.600</span></div>
+                  </div>
+                  <div class="flex justify-between items-center p-1.5 rounded bg-slate-900/60">
+                    <div><span class="text-purple-400 font-bold">Designer</span> (n=2, ȳ_c=0.00):</div>
+                    <div>&lambda;=<span id="te-des-lambda" class="text-emerald-300">0.500</span> &rarr; <span id="te-des-res" class="text-amber-300 font-bold">S = 0.250</span></div>
+                  </div>
+                  <div class="flex justify-between items-center p-1.5 rounded bg-slate-900/60 border border-amber-900/50">
+                    <div><span class="text-amber-400 font-bold">Student</span> (n=1, ȳ_c=1.00 <span class="text-[9px] text-rose-400 font-sans">Rare!</span>):</div>
+                    <div>&lambda;=<span id="te-stu-lambda" class="text-emerald-300">0.333</span> &rarr; <span id="te-stu-res" class="text-amber-300 font-bold">S = 0.667</span></div>
+                  </div>
+                  <div class="flex justify-between items-center p-1.5 rounded bg-slate-900/60 border border-blue-900/40">
+                    <div><span class="text-blue-300 font-bold">Doctor</span> (n=0, <span class="text-[9px] text-blue-400 font-sans">Unseen Level</span>):</div>
+                    <div>&lambda;=<span id="te-doc-lambda" class="text-emerald-300">0.000</span> &rarr; <span id="te-doc-res" class="text-blue-300 font-bold">S = 0.500</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Shrinkage Weight Curve Canvas -->
+              <div class="h-24 bg-slate-950 rounded-xl border border-slate-800 p-2 relative">
+                <canvas id="canvas-shrinkage" width="300" height="90" class="w-full h-full"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-3 bg-emerald-950/30 border border-emerald-800/40 rounded-xl text-[11px] text-emerald-200">
+            <strong>Key Insight:</strong> Without Bayesian smoothing (m=0), rare category <code>Student</code> (1 record with default=1) encodes to 1.00 (100% default risk!), causing catastrophic overfitting. The m-estimate shrinks it to 0.67, anchoring it safely toward the population mean (0.50). Unseen categories (<code>Doctor</code>, n=0) gracefully fall back to 0.50 without error.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- MODULE 3: DISTRIBUTION TRANSFORMS & LOG/BOX-COX DEEP DIVE -->
+    <!-- =================================================================== -->
+    <section id="tab-distribution" class="tab-content hidden space-y-6">
+      
+      <!-- HERO BANNER: THE GEOMETRIC & PHYSICAL INTUITION OF LOG TRANSFORMS -->
+      <div class="bg-gradient-to-br from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-4 border-b border-slate-800">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 bg-amber-400 text-slate-950 font-bold rounded text-[11px] uppercase tracking-wider">Module 3 • Crucial Mathematical Intuition</span>
+              <span class="text-xs text-indigo-300 font-mono">Derivative: d/dx[ln(x)] = 1/x</span>
+            </div>
+            <h2 class="text-2xl font-bold text-white mt-1">Why Logarithms Pull Right-Skewed Data into a Gaussian Bell Curve</h2>
+            <p class="text-sm text-slate-300 max-w-3xl mt-1 leading-relaxed">
+              A right-skewed distribution has a dense cluster of points near zero and a sparsely stretched tail reaching toward infinity. 
+              The logarithm operates as an <em>elastic non-linear lens</em>: high derivative for small numbers expands the crowded head, while tiny derivative for large numbers reels in the distant tail!
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="toggleMorphAnimation()" id="btn-morph-anim" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
+              <span id="morph-play-icon">▶</span> <span id="morph-play-label">Play Morphing Animation</span>
+            </button>
+            <button onclick="resetDistView()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium transition">
+              Reset
+            </button>
+          </div>
+        </div>
+
+        <!-- MATHEMATICAL MECHANISM CARDS -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5">
+          <div class="bg-slate-950/70 p-4 rounded-xl border border-indigo-900/40">
+            <div class="text-amber-400 text-xs font-bold uppercase tracking-wider">1. The Multiplicative-to-Additive Property</div>
+            <div class="text-sm font-mono text-white mt-1">ln(A × B) = ln(A) + ln(B)</div>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+              Processes like compound interest, viral spread, or wealth accumulation operate <strong>multiplicatively</strong>: $X = \prod W_i$. By taking logs, multiplicative growth turns into an additive sum: $\ln(X) = \sum \ln(W_i)$. By the Central Limit Theorem (CLT), sums of independent shocks converge to a Gaussian Normal distribution!
+            </p>
+          </div>
+
+          <div class="bg-slate-950/70 p-4 rounded-xl border border-indigo-900/40">
+            <div class="text-emerald-400 text-xs font-bold uppercase tracking-wider">2. Non-Uniform Rubber Band Physics</div>
+            <div class="text-sm font-mono text-white mt-1">Δy ≈ (1/x) · Δx</div>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+              At $x = 1$, slope $= 1.0$ (distances preserved).<br>
+              At $x = 100$, slope $= 0.01$ ($100\times$ compression!).<br>
+              A huge leap from $100 \to 1,000$ (spread of $900$) maps to $\ln(1000) - \ln(100) = 2.30$, identical to the leap from $1 \to 10$ (spread of $9$)!
+            </p>
+          </div>
+
+          <div class="bg-slate-950/70 p-4 rounded-xl border border-indigo-900/40">
+            <div class="text-rose-400 text-xs font-bold uppercase tracking-wider">3. The Zero/Negative Domain Barrier</div>
+            <div class="text-sm font-mono text-white mt-1">x ≤ 0 ⟹ ln(x) Undefined!</div>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+              Box-Cox breaks down immediately on non-positive values. <strong>Yeo-Johnson (2000)</strong> remedies this by reflecting the curve smoothly across zero via a convex piecewise branch for $x &lt; 0$.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE DATA GENERATOR & PLAYGROUND BAR -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-semibold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+            <span>🎲 Quick Distributions:</span>
+          </span>
+          <button onclick="generateRandomData('lognormal')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition border border-slate-700">
+            Lognormal Income
+          </button>
+          <button onclick="generateRandomData('exponential')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition border border-slate-700">
+            Exponential Decay
+          </button>
+          <button onclick="generateRandomData('bimodal')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition border border-slate-700">
+            Bimodal Skewed
+          </button>
+          <button onclick="generateRandomData('zeros')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition border border-slate-700">
+            Zero-Inflated
+          </button>
+          <button onclick="generateRandomData('subzero')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition border border-slate-700">
+            Sub-Zero Financial
+          </button>
+        </div>
+        <div class="flex items-center gap-3 w-full md:w-auto">
+          <div class="flex items-center gap-2 text-xs">
+            <span class="text-slate-400">Samples N:</span>
+            <input type="range" id="dist-sample-n" min="15" max="300" step="5" value="40" class="w-24 accent-blue-500 cursor-pointer" oninput="document.getElementById('dist-sample-n-val').innerText = this.value; generateRandomData(currentDistType)">
+            <span id="dist-sample-n-val" class="font-mono text-blue-400 font-bold w-7 text-right">40</span>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="text-slate-400">Tail Spread (σ):</span>
+            <input type="range" id="dist-skew-sigma" min="0.3" max="2.2" step="0.1" value="1.2" class="w-20 accent-amber-500 cursor-pointer" oninput="document.getElementById('dist-skew-sigma-val').innerText = this.value; generateRandomData(currentDistType)">
+            <span id="dist-skew-sigma-val" class="font-mono text-amber-400 font-bold w-6 text-right">1.2</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE TRANSFORMATION CURVE & MAPPING VISUALIZER -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Interactive Canvas: The Non-Linear Projector -->
+        <div class="lg:col-span-8 bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+          <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
+            <div>
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span> Dual-Axis Projection Ray Visualizer: X (Raw) ➔ Curve ➔ Y (Transformed)
+              </h3>
+              <p class="text-xs text-slate-400">Hover or click anywhere on the curve to inspect instantaneous derivative dy/dx and compression ratio.</p>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-slate-400">Transform:</span>
+              <select id="dist-curve-select" class="bg-slate-950 border border-slate-700 rounded px-2.5 py-1 text-xs text-amber-300 font-mono" onchange="onDistCurveSelectChange(this.value)">
+                <option value="log">y = ln(x)  (Natural Log)</option>
+                <option value="boxcox">y = (x^λ - 1) / λ  (Box-Cox)</option>
+                <option value="yeojohnson">y = ψ_YJ(λ, x)  (Yeo-Johnson)</option>
+                <option value="sqrt">y = √x  (Square Root, λ=0.5)</option>
+                <option value="linear">y = x  (Linear Identity, λ=1.0)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- The Projection Canvas -->
+          <div class="h-[380px] bg-slate-950 rounded-xl border border-slate-800 p-2 relative cursor-crosshair">
+            <canvas id="canvas-projection" width="700" height="360" class="w-full h-full"></canvas>
+            <!-- Floating Tooltip for Canvas Hover/Probe -->
+            <div id="canvas-probe-tooltip" class="absolute hidden bg-slate-900/95 border border-indigo-500/50 rounded-lg p-2 text-[11px] font-mono shadow-2xl pointer-events-none backdrop-blur z-20">
+            </div>
+          </div>
+
+          <!-- Tangent Probe Slider & Live Derivative Readout -->
+          <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3 mt-3 flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-2 w-full md:w-auto">
+              <span class="text-amber-400 font-semibold uppercase tracking-wider text-[10px] whitespace-nowrap">Interactive Tangent Probe (X₀):</span>
+              <input type="range" id="probe-slider" min="1" max="100" value="25" class="w-full md:w-44 accent-amber-400 cursor-pointer" oninput="updateProbeFromSlider(this.value)">
+              <span id="probe-slider-val" class="font-mono text-amber-300 font-bold w-12 text-right">25.0</span>
+            </div>
+            <div id="probe-math-readout" class="font-mono text-slate-300 text-center md:text-right text-[11px]">
+              Slope dy/dx = <span class="text-emerald-400 font-bold">0.040</span> ⟹ 1 unit on X squeezes to <span class="text-blue-400 font-bold">0.040</span> on Y (<span class="text-amber-400 font-bold">25.0x</span> compression)
+            </div>
+          </div>
+
+          <!-- Bottom Metric & Skewness Bar -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3 pt-3 border-t border-slate-800 text-center text-xs">
+            <div class="p-2.5 bg-slate-950/80 rounded-xl border border-slate-800/80">
+              <span class="block text-slate-400 text-[10px] uppercase font-mono">Raw Skewness (g₁)</span>
+              <span id="metric-raw-skew" class="font-mono font-bold text-amber-400 text-sm">+2.84 (Heavy Right)</span>
+            </div>
+            <div class="p-2.5 bg-slate-950/80 rounded-xl border border-slate-800/80">
+              <span class="block text-slate-400 text-[10px] uppercase font-mono">Transformed Skewness</span>
+              <span id="metric-trans-skew" class="font-mono font-bold text-emerald-400 text-sm">+0.04 (Nearly Normal!)</span>
+            </div>
+            <div class="p-2.5 bg-slate-950/80 rounded-xl border border-slate-800/80">
+              <span class="block text-slate-400 text-[10px] uppercase font-mono">Head/Tail Span Ratio</span>
+              <span id="metric-span-ratio" class="font-mono font-bold text-blue-400 text-sm">Compressed 43.5x</span>
+            </div>
+            <div class="p-2.5 bg-slate-950/80 rounded-xl border border-slate-800/80">
+              <span class="block text-slate-400 text-[10px] uppercase font-mono">Normality Q-Q Fit R²</span>
+              <span id="metric-qq-fit" class="font-mono font-bold text-purple-400 text-sm">0.994 (Pass)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls, Lambda Tuning & Q-Q Plot -->
+        <div class="lg:col-span-4 bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col justify-between space-y-4">
+          <div>
+            <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-3">
+              <span class="w-2.5 h-2.5 rounded-full bg-purple-400"></span> Box-Cox / Yeo-Johnson λ Control Panel
+            </h3>
+
+            <!-- Custom Data Input Box -->
+            <div class="space-y-1 mb-3">
+              <div class="flex justify-between items-center text-xs">
+                <label class="font-medium text-slate-300">Custom Dataset Payload:</label>
+                <button onclick="applyCustomDataInput()" class="text-[10px] text-amber-400 hover:text-amber-300 underline font-mono">Apply CSV</button>
+              </div>
+              <input type="text" id="custom-dist-input" value="1.2, 2.5, 4.0, 7.8, 15.0, 32.0, 75.0, 180.0, 450.0" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-amber-300 font-mono" onchange="applyCustomDataInput()">
+              <p class="text-[10px] text-slate-500">Edit or paste comma-separated numbers directly.</p>
+            </div>
+
+            <!-- Lambda Slider with Dynamic Math Label -->
+            <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-300 font-medium">Power Parameter (λ):</span>
+                <span id="slider-lambda-val" class="font-mono font-bold text-amber-400 px-2 py-0.5 bg-amber-950/60 border border-amber-800/60 rounded">λ = 0.00 (Log)</span>
+              </div>
+              <input type="range" id="slider-lambda" min="-2.0" max="2.5" step="0.05" value="0.00" class="w-full accent-amber-400 cursor-pointer" oninput="updateLambdaFromSlider(this.value)">
+              <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+                <span>-2.0 (1/x²)</span>
+                <span>-1.0 (1/x)</span>
+                <span class="text-amber-300 font-bold">0.0 (ln)</span>
+                <span>0.5 (√x)</span>
+                <span>1.0 (x)</span>
+                <span class="text-emerald-400 font-bold">2.0 (x²)</span>
+                <span>2.5</span>
+              </div>
+              <div class="flex gap-2 pt-1">
+                <button onclick="setOptimalLambda()" class="flex-1 py-1.5 bg-emerald-600/30 hover:bg-emerald-600/50 border border-emerald-500/50 text-emerald-300 rounded-lg text-xs font-medium transition flex items-center justify-center gap-1">
+                  ⚡ Auto-Fit Optimal λ (MLE)
+                </button>
+              </div>
+            </div>
+
+            <!-- Domain Violation Alert Box -->
+            <div id="domain-alert-banner" class="p-3 rounded-xl border text-xs leading-relaxed transition-all mt-3 bg-emerald-950/30 border-emerald-800/40 text-emerald-300">
+              ✅ <strong>Domain Valid:</strong> All values are strictly positive ($x &gt; 0$). Both Box-Cox and Yeo-Johnson are valid.
+            </div>
+          </div>
+
+          <!-- Mini Normality Q-Q Plot -->
+          <div>
+            <div class="flex justify-between items-center mb-1 text-xs">
+              <span class="text-slate-300 font-medium">Normality Q-Q Plot:</span>
+              <span class="text-[10px] text-slate-500">Points hugging diagonal = Gaussian</span>
+            </div>
+            <div class="h-32 bg-slate-950 rounded-xl border border-slate-800 p-2">
+              <canvas id="canvas-qq" width="300" height="120" class="w-full h-full"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+                        <!-- =================================================================== -->
+      <!-- DUAL-KDE SKEWNESS MORPHING STUDIO: RIGHT-SKEWED VS LEFT-SKEWED -->
+      <!-- =================================================================== -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-800">
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-wider text-amber-400">Interactive KDE Morphing Studio</span>
+            <h3 class="text-xl font-bold text-white flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> Dual KDE Curves: Left-Skewed vs. Right-Skewed Power Adaptation
+            </h3>
+            <p class="text-xs text-slate-300">
+              Drag parameter &lambda; below to see both KDE curves morph in real time. Observe how &lambda;* &approx; 0.00 (Log) cures Right-Skew while &lambda;* &approx; 2.00 (Square) cures Left-Skew!
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="syncAllLambda(0.00)" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-medium transition shadow flex items-center gap-1.5">
+              <span>⚡</span> Snap Right-Skew Optimal (&lambda;* = 0.00)
+            </button>
+            <button onclick="syncAllLambda(2.00)" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-medium transition shadow flex items-center gap-1.5">
+              <span>⚡</span> Snap Left-Skew Optimal (&lambda;* = 2.00)
+            </button>
+            <button onclick="resampleDualKdeData()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition">
+              🎲 Resample Noise
+            </button>
+          </div>
+        </div>
+
+        <!-- DEDICATED REACTIVE LAMBDA SLIDER RIGHT ABOVE CANVASES -->
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+          <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 text-xs">
+            <div class="flex items-center gap-2">
+              <span class="text-slate-300 font-semibold uppercase tracking-wider text-[11px]">Power Parameter (&lambda;):</span>
+              <span id="dual-kde-lambda-val" class="font-mono font-bold text-amber-400 px-2.5 py-0.5 bg-amber-950/60 border border-amber-800/60 rounded text-sm">&lambda; = 0.00 (Log ln)</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5 text-[10px]">
+              <button onclick="syncAllLambda(0.00)" class="px-2 py-0.5 bg-blue-950 text-blue-300 border border-blue-800 rounded font-mono hover:bg-blue-900 transition">
+                &lambda; = 0.00 (Log)
+              </button>
+              <button onclick="syncAllLambda(0.50)" class="px-2 py-0.5 bg-slate-900 text-slate-300 border border-slate-700 rounded font-mono hover:bg-slate-800 transition">
+                &lambda; = 0.50 (&radic;x)
+              </button>
+              <button onclick="syncAllLambda(1.00)" class="px-2 py-0.5 bg-slate-900 text-slate-300 border border-slate-700 rounded font-mono hover:bg-slate-800 transition">
+                &lambda; = 1.00 (Raw Scale)
+              </button>
+              <button onclick="syncAllLambda(2.00)" class="px-2 py-0.5 bg-emerald-950 text-emerald-300 border border-emerald-800 rounded font-mono hover:bg-emerald-900 transition">
+                &lambda; = 2.00 (x&sup2; Power)
+              </button>
+            </div>
+          </div>
+          <input type="range" id="dual-kde-lambda-slider" min="-2.0" max="2.5" step="0.05" value="0.00" class="w-full accent-amber-400 cursor-pointer" oninput="syncAllLambda(parseFloat(this.value))">
+          <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+            <span>-2.0 (1/x&sup2;)</span>
+            <span>-1.0 (1/x)</span>
+            <span class="text-blue-400 font-bold">0.0 (Log &bull; Right Optimal)</span>
+            <span>0.5 (&radic;x)</span>
+            <span>1.0 (Raw x)</span>
+            <span class="text-emerald-400 font-bold">2.0 (x&sup2; &bull; Left Optimal)</span>
+            <span>2.5 (High Power)</span>
+          </div>
+        </div>
+
+        <!-- TWO SIDE-BY-SIDE CANVASES -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- PANEL 1: RIGHT-SKEWED (LỆCH PHẢI) -->
+          <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col justify-between space-y-4">
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
+                  <h4 class="text-sm font-bold text-white">1. Right-Skewed Distribution (Phân phối Lệch Phải)</h4>
+                </div>
+                <span class="text-[11px] font-mono text-amber-400">Optimal: &lambda;* &asymp; 0.00 (Log)</span>
+              </div>
+              <div class="flex items-center gap-4 text-[11px] text-slate-400 mb-2">
+                <span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-amber-400 inline-block border-t border-dashed"></span> Raw Baseline (g₁ &gt; 0)</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-1 bg-blue-400 inline-block rounded"></span> Active Transformed KDE (λ)</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-slate-200 inline-block border-t border-dashed"></span> Standard Normal N(0, 1)</span>
+              </div>
+              <div class="relative w-full h-56 bg-slate-900/60 rounded-xl border border-slate-800 overflow-hidden">
+                <canvas id="canvas-kde-right" class="w-full h-full"></canvas>
+              </div>
+            </div>
+
+            <!-- Metrics & Optimal Badge -->
+            <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800/80 text-center font-mono text-xs">
+              <div class="p-2 bg-slate-900 rounded border border-slate-800">
+                <span class="text-[10px] text-slate-400 block font-sans">Current Skew (g₁)</span>
+                <span id="kde-right-skew" class="font-bold text-amber-400">+0.00</span>
+              </div>
+              <div class="p-2 bg-slate-900 rounded border border-slate-800">
+                <span class="text-[10px] text-slate-400 block font-sans">Bell Curve Fit</span>
+                <span id="kde-right-fit" class="font-bold text-emerald-400">99.5%</span>
+              </div>
+              <div class="p-2 bg-slate-900 rounded border border-slate-800 flex items-center justify-center">
+                <span id="kde-right-badge" class="px-2 py-1 rounded text-[10px] font-bold font-sans bg-emerald-950 text-emerald-300 border border-emerald-700 shadow">
+                  🎯 Optimal Bell Match!
+                </span>
+              </div>
+            </div>
+            <p class="text-[11px] text-slate-400">
+              <strong>Mechanism:</strong> Concave mapping (&lambda; &lt; 1, especially &lambda; &to; 0) stretches dense points near zero and pulls the long right tail inward, aligning with the Gaussian bell curve.
+            </p>
+          </div>
+
+          <!-- PANEL 2: LEFT-SKEWED (LỆCH TRÁI) -->
+          <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col justify-between space-y-4">
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                  <h4 class="text-sm font-bold text-white">2. Left-Skewed Distribution (Phân phối Lệch Trái)</h4>
+                </div>
+                <span class="text-[11px] font-mono text-emerald-400">Optimal: &lambda;* &asymp; 2.00 (Power 2)</span>
+              </div>
+              <div class="flex items-center gap-4 text-[11px] text-slate-400 mb-2">
+                <span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-rose-400 inline-block border-t border-dashed"></span> Raw Baseline (g₁ &lt; 0)</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-1 bg-emerald-400 inline-block rounded"></span> Active Transformed KDE (λ)</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-slate-200 inline-block border-t border-dashed"></span> Standard Normal N(0, 1)</span>
+              </div>
+              <div class="relative w-full h-56 bg-slate-900/60 rounded-xl border border-slate-800 overflow-hidden">
+                <canvas id="canvas-kde-left" class="w-full h-full"></canvas>
+              </div>
+            </div>
+
+            <!-- Metrics & Optimal Badge -->
+            <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800/80 text-center font-mono text-xs">
+              <div class="p-2 bg-slate-900 rounded border border-slate-800">
+                <span class="text-[10px] text-slate-400 block font-sans">Current Skew (g₁)</span>
+                <span id="kde-left-skew" class="font-bold text-rose-400">-1.67</span>
+              </div>
+              <div class="p-2 bg-slate-900 rounded border border-slate-800">
+                <span class="text-[10px] text-slate-400 block font-sans">Bell Curve Fit</span>
+                <span id="kde-left-fit" class="font-bold text-slate-400">72.4%</span>
+              </div>
+              <div class="p-2 bg-slate-900 rounded border border-slate-800 flex items-center justify-center">
+                <span id="kde-left-badge" class="px-2 py-1 rounded text-[10px] font-bold font-sans bg-slate-900 text-slate-400 border border-slate-800">
+                  Increase &lambda; ➔
+                </span>
+              </div>
+            </div>
+            <p class="text-[11px] text-slate-400">
+              <strong>Mechanism:</strong> Convex mapping (&lambda; &gt; 1, especially &lambda; &asymp; 2) expands the upper cluster and contracts the long left tail, restoring bilateral Gaussian symmetry.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTOGRAM COMPARISON (BEFORE VS AFTER) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-lg">
+          <div class="flex justify-between items-center mb-2">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400">1. Original Raw Distribution (Before)</h4>
+            <span class="text-xs text-slate-400">Asymmetric Lopsided Tail</span>
+          </div>
+          <div class="h-44 bg-slate-950 rounded-xl border border-slate-800 p-2">
+            <canvas id="canvas-hist-raw" width="400" height="160" class="w-full h-full"></canvas>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-lg">
+          <div class="flex justify-between items-center mb-2">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400">2. Transformed Distribution (After λ Reshaping)</h4>
+            <span class="text-xs text-slate-400">Symmetric Gaussian Bell Curve</span>
+          </div>
+          <div class="h-44 bg-slate-950 rounded-xl border border-slate-800 p-2">
+            <canvas id="canvas-hist-trans" width="400" height="160" class="w-full h-full"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- MODULE 4: ADVANCED TRANSFORMS & TARGET INVERSION -->
+    <!-- =================================================================== -->
+    <section id="tab-advanced" class="tab-content hidden space-y-6">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl">
+        <span class="text-xs font-semibold uppercase tracking-wider text-amber-400">Module 4 • Advanced & Target Transformations</span>
+        <h2 class="text-xl font-bold text-white">Discretization, Polynomial Features & Target Inversion</h2>
+        <p class="text-sm text-slate-300">Simulate binning strategies, calculate combinatorial explosion, and prevent disastrous un-inverted target reporting.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Sub-tool 4A: KBinsDiscretizer Live Bin Edges -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center pb-2 border-b border-slate-800 mb-3">
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span> KBinsDiscretizer
+              </h3>
+              <span class="text-xs text-blue-300 font-mono">Non-Linear Boundaries</span>
+            </div>
+            
+            <div class="space-y-3 text-xs">
+              <div>
+                <label class="block text-slate-400 mb-1">Strategy:</label>
+                <select id="kbins-strategy" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1 text-xs text-white" onchange="updateKBinsSimulation()">
+                  <option value="uniform">uniform (Equal Width)</option>
+                  <option value="quantile">quantile (Equal Sample Count)</option>
+                  <option value="kmeans">kmeans (1D Clustering)</option>
+                </select>
+              </div>
+
+              <div>
+                <div class="flex justify-between mb-1">
+                  <label class="text-slate-400">Number of Bins (k):</label>
+                  <span id="kbins-k-val" class="font-mono text-blue-400 font-bold">3 bins</span>
+                </div>
+                <input type="range" id="kbins-slider" min="2" max="6" value="3" class="w-full accent-blue-500" oninput="document.getElementById('kbins-k-val').innerText = this.value + ' bins'; updateKBinsSimulation()">
+              </div>
+
+              <div class="h-32 bg-slate-950 rounded-xl border border-slate-800 p-2">
+                <canvas id="canvas-kbins" width="280" height="110" class="w-full h-full"></canvas>
+              </div>
+
+              <div class="p-2.5 bg-slate-950 rounded-lg font-mono text-[11px] text-slate-300">
+                <div class="text-slate-400 text-[10px]">Computed Bin Edges:</div>
+                <div id="kbins-edges-text" class="text-amber-300 font-bold mt-0.5">[18.0, 38.7, 59.3, 80.0]</div>
+              </div>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2">Discretization introduces non-linear step boundaries into linear estimators.</p>
+        </div>
+
+        <!-- Sub-tool 4B: Polynomial Combinatorics Explosion -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center pb-2 border-b border-slate-800 mb-3">
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> Polynomial Combinatorics
+              </h3>
+              <span class="text-xs text-amber-300 font-mono">Curse of Dimensionality</span>
+            </div>
+
+            <div class="space-y-3 text-xs">
+              <div class="flex justify-between">
+                <label class="text-slate-400">Input Features (P):</label>
+                <span id="poly-p-val" class="font-mono text-amber-300 font-bold">5 features</span>
+              </div>
+              <input type="range" id="poly-p-slider" min="1" max="25" value="5" class="w-full accent-amber-500" oninput="document.getElementById('poly-p-val').innerText = this.value + ' features'; updatePolySimulation()">
+
+              <div class="flex justify-between">
+                <label class="text-slate-400">Degree (d):</label>
+                <span id="poly-d-val" class="font-mono text-amber-300 font-bold">Degree 2</span>
+              </div>
+              <input type="range" id="poly-d-slider" min="1" max="4" value="2" class="w-full accent-amber-500" oninput="document.getElementById('poly-d-val').innerText = 'Degree ' + this.value; updatePolySimulation()">
+
+              <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-center">
+                <span class="text-[10px] uppercase tracking-wider text-slate-400">Formula: M = C(P+d, d) - 1</span>
+                <div id="poly-result-count" class="text-2xl font-bold font-mono text-amber-400 my-1">20 Features</div>
+                <div id="poly-status-tag" class="text-[11px] text-emerald-400">Feasible & Stable</div>
+              </div>
+
+              <!-- Interactive Term Explorer Pill Box -->
+              <div class="p-2 bg-slate-950 rounded-lg border border-slate-800">
+                <div class="text-[10px] text-slate-400 mb-1">Sample Generated Columns:</div>
+                <div id="poly-terms-preview" class="flex flex-wrap gap-1 font-mono text-[10px] text-amber-300">
+                  <span class="px-1.5 py-0.5 bg-slate-900 rounded border border-slate-700">1</span>
+                  <span class="px-1.5 py-0.5 bg-slate-900 rounded border border-slate-700">x₁</span>
+                  <span class="px-1.5 py-0.5 bg-slate-900 rounded border border-slate-700">x₂</span>
+                  <span class="px-1.5 py-0.5 bg-slate-900 rounded border border-slate-700">x₁²</span>
+                  <span class="px-1.5 py-0.5 bg-slate-900 rounded border border-slate-700">x₁x₂</span>
+                  <span class="px-1.5 py-0.5 bg-slate-900 rounded border border-slate-700">x₂²</span>
+                </div>
+              </div>
+
+              <p class="text-[11px] text-slate-400 leading-relaxed">
+                <strong class="text-rose-400">Mandatory Rule:</strong> Standardize continuous variables before polynomial expansion. An unscaled feature with value 1,000 squared reaches 1,000,000, causing numerical instability.
+              </p>
+            </div>
+          </div>
+          <div class="text-[10px] text-slate-500 mt-2">Notice how P=20 at degree 3 explodes into 1,770 columns!</div>
+        </div>
+
+        <!-- Sub-tool 4C: Target Log-Transform & Mandatory Inversion -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center pb-2 border-b border-slate-800 mb-3">
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Target Inversion Error
+              </h3>
+              <span class="text-xs text-rose-300 font-mono">Scale Inversion Trap</span>
+            </div>
+
+            <div class="space-y-3 text-xs">
+              <div>
+                <label class="block text-slate-400 mb-1">Model Log-Space Prediction (ẑ = ŷ'):</label>
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-400">log(1+y) value:</span>
+                  <span id="target-log-val" class="font-mono text-rose-400 font-bold">4.000</span>
+                </div>
+                <input type="range" id="target-slider" min="1.0" max="8.0" step="0.1" value="4.0" class="w-full accent-rose-500 cursor-pointer" oninput="document.getElementById('target-log-val').innerText = parseFloat(this.value).toFixed(3); updateTargetSimulation()">
+              </div>
+
+              <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+                <div class="flex justify-between">
+                  <span class="text-slate-400">Correct Inversion: exp(ẑ) - 1:</span>
+                  <span id="target-correct-val" class="font-mono font-bold text-emerald-400 text-sm">$53,598</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-400">Blunder Value (untransformed ẑ):</span>
+                  <span id="target-blunder-val" class="font-mono font-bold text-rose-400 text-sm">$4.0</span>
+                </div>
+                <div class="flex justify-between pt-1 border-t border-slate-800 text-[11px]">
+                  <span class="text-slate-400">Underestimation Penalty:</span>
+                  <span id="target-error-ratio" class="font-mono text-rose-300 font-bold">13,399x Error</span>
+                </div>
+              </div>
+
+              <div class="p-2.5 bg-rose-950/30 border border-rose-800/40 rounded-xl text-[11px] text-rose-200">
+                <strong>Catastrophic Reporting Blunder:</strong> Reporting the raw model prediction ẑ = 4.0 without applying <code class="text-white">expm1</code> misrepresents a $53.6k price as $4.0k!
+              </div>
+            </div>
+          </div>
+          <div class="text-[10px] text-slate-500 mt-2">Use TransformedTargetRegressor to automate inverse transform.</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-slate-950 border-t border-slate-800 py-4 px-6 text-center text-xs text-slate-400">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
+      <div>Data Preparation & Visualization (DPV) • Faculty of Mathematical Economics • NEU</div>
+      <div>Authoritative Academic Reference: <a href="../exercises_solutions_manual.md" class="text-amber-400 hover:underline">Master Solution Manual (Lesson 06+)</a></div>
+    </div>
+  </footer>
+
+  <!-- =================================================================== -->
+  <!-- JAVASCRIPT MASTER SIMULATION LOGIC -->
+  <!-- =================================================================== -->
+  <script>
+    // Tab switching logic
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('tab-active');
+        btn.classList.add('text-slate-400');
+      });
+      document.getElementById(tabId).classList.remove('hidden');
+      const activeBtn = document.getElementById('btn-' + tabId);
+      activeBtn.classList.add('tab-active');
+      activeBtn.classList.remove('text-slate-400');
+
+      if (tabId === 'tab-scaling') { updateScalingSimulation(); drawLossContour(); }
+      if (tabId === 'tab-categorical') { updateDummyMatrix(); updateTargetEncoder(); }
+      if (tabId === 'tab-distribution') { setTimeout(() => { const l = parseFloat(document.getElementById('slider-lambda').value); updateDistributionSimulation(); drawDualKdeStudio(l); }, 30); }
+      if (tabId === 'tab-advanced') { updateKBinsSimulation(); updatePolySimulation(); updateTargetSimulation(); }
+    }
+
+    // ==========================================
+    // MODULE 1: SCALING & LOSS CONTOUR ENGINE
+    // ==========================================
+    let gdStartW1 = -0.85;
+    let gdStartW2 = 0.75;
+    let gdAnimTimer = null;
+
+    function loadScalingPreset(preset) {
+      if (preset === 'outlier') {
+        document.getElementById('scaling-inliers-input').value = '10, 20, 30, 40';
+        document.getElementById('scaling-outlier-slider').value = '1000';
+        document.getElementById('scaling-outlier-val').innerText = '1000.0';
+        document.getElementById('scaling-test-sample').value = '95';
+      } else if (preset === 'uniform') {
+        document.getElementById('scaling-inliers-input').value = '20, 35, 50, 65';
+        document.getElementById('scaling-outlier-slider').value = '80';
+        document.getElementById('scaling-outlier-val').innerText = '80.0';
+        document.getElementById('scaling-test-sample').value = '95';
+      } else if (preset === 'moderate') {
+        document.getElementById('scaling-inliers-input').value = '15, 25, 35, 45';
+        document.getElementById('scaling-outlier-slider').value = '500';
+        document.getElementById('scaling-outlier-val').innerText = '500.0';
+        document.getElementById('scaling-test-sample').value = '95';
+      }
+      updateScalingSimulation();
+    }
+
+    function updateScalingSimulation() {
+      const inliersStr = document.getElementById('scaling-inliers-input').value;
+      const inliers = inliersStr.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
+      const outlier = parseFloat(document.getElementById('scaling-outlier-slider').value);
+      const clip = document.getElementById('scaling-clip-checkbox').checked;
+      const testSample = parseFloat(document.getElementById('scaling-test-sample').value) || 0;
+
+      const data = [...inliers, outlier].sort((a, b) => a - b);
+      const N = data.length;
+
+      const minVal = data[0];
+      const maxVal = data[N - 1];
+      const rangeVal = maxVal - minVal || 1.0;
+
+      const mean = data.reduce((a, b) => a + b, 0) / N;
+      const variance = data.reduce((acc, x) => acc + Math.pow(x - mean, 2), 0) / N;
+      const std = Math.sqrt(variance) || 1.0;
+
+      function getPercentile(arr, p) {
+        const index = (arr.length - 1) * p;
+        const lower = Math.floor(index);
+        const upper = Math.ceil(index);
+        const weight = index - lower;
+        if (lower === upper) return arr[lower];
+        return arr[lower] * (1 - weight) + arr[upper] * weight;
+      }
+      const q1 = getPercentile(data, 0.25);
+      const q2 = getPercentile(data, 0.50);
+      const q3 = getPercentile(data, 0.75);
+      const iqr = q3 - q1 || 1.0;
+
+      const inlierMin = inliers[0];
+      const inlierMax = inliers[inliers.length - 1];
+      const zInlierSpan = Math.abs((inlierMax - inlierMin) / std);
+      document.getElementById('stat-inlier-span').innerText = `${zInlierSpan.toFixed(3)} σ (Squashed Inliers)`;
+
+      let testMinMax = (testSample - minVal) / rangeVal;
+      if (clip) testMinMax = Math.max(0, Math.min(1, testMinMax));
+      document.getElementById('stat-test-transform').innerText = `x* = ${testMinMax.toFixed(3)} ${clip ? '(clipped)' : (testMinMax > 1 ? '(> 1.0)' : '')}`;
+
+      drawScalingCanvas(data, inliers, outlier, minVal, maxVal, rangeVal, mean, std, q2, iqr);
+      drawLossContour();
+    }
+
+    function drawScalingCanvas(data, inliers, outlier, minVal, maxVal, rangeVal, mean, std, median, iqr) {
+      const canvas = document.getElementById('canvas-scaling');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+
+      const tracks = [
+        { name: "Raw Values (Original)", color: "#94a3b8", y: 45 },
+        { name: "MinMaxScaler [0, 1]", color: "#60a5fa", y: 125 },
+        { name: "StandardScaler (z-score)", color: "#c084fc", y: 205 },
+        { name: "RobustScaler (IQR)", color: "#34d399", y: 285 }
+      ];
+
+      tracks.forEach((t, idx) => {
+        ctx.strokeStyle = "#334155";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(80, t.y);
+        ctx.lineTo(W - 40, t.y);
+        ctx.stroke();
+
+        ctx.fillStyle = t.color;
+        ctx.font = "bold 11px system-ui, sans-serif";
+        ctx.textAlign = "left";
+        ctx.fillText(t.name, 80, t.y - 14);
+
+        data.forEach(val => {
+          let normX = 0;
+          let label = "";
+          const isOutlier = (val === outlier);
+
+          if (idx === 0) {
+            normX = (val - minVal) / (maxVal - minVal || 1);
+            label = val.toFixed(0);
+          } else if (idx === 1) {
+            normX = (val - minVal) / (maxVal - minVal || 1);
+            label = normX.toFixed(2);
+          } else if (idx === 2) {
+            const z = (val - mean) / std;
+            normX = 0.5 + (z * 0.15);
+            normX = Math.max(0.05, Math.min(0.95, normX));
+            label = z.toFixed(2);
+          } else if (idx === 3) {
+            const r = (val - median) / iqr;
+            normX = 0.5 + (r * 0.08);
+            normX = Math.max(0.05, Math.min(0.95, normX));
+            label = r.toFixed(2);
+          }
+
+          const screenX = 80 + normX * (W - 120);
+
+          ctx.beginPath();
+          ctx.arc(screenX, t.y, isOutlier ? 6 : 4.5, 0, 2 * Math.PI);
+          ctx.fillStyle = isOutlier ? "#f43f5e" : t.color;
+          ctx.fill();
+          ctx.strokeStyle = "#0f172a";
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+
+          ctx.fillStyle = isOutlier ? "#fda4af" : "#cbd5e1";
+          ctx.font = "10px monospace";
+          ctx.textAlign = "center";
+          ctx.fillText(label, screenX, t.y + 16);
+        });
+      });
+    }
+
+    function setGDStartPoint(event) {
+      const canvas = document.getElementById('canvas-contour');
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      const halfW = canvas.width / 2;
+
+      // Determine clicked sub-panel
+      if (x < halfW) {
+        gdStartW1 = ((x - halfW / 2) / (halfW / 2)) * 1.5;
+        gdStartW2 = -((y - canvas.height / 2) / (canvas.height / 2)) * 1.5;
+      } else {
+        gdStartW1 = ((x - (halfW + halfW / 2)) / (halfW / 2)) * 1.5;
+        gdStartW2 = -((y - canvas.height / 2) / (canvas.height / 2)) * 1.5;
+      }
+      drawLossContour();
+    }
+
+    function runGradientDescentAnimation() {
+      let step = 0;
+      const maxSteps = 25;
+      if (gdAnimTimer) clearInterval(gdAnimTimer);
+
+      gdAnimTimer = setInterval(() => {
+        step++;
+        drawLossContour(step);
+        if (step >= maxSteps) {
+          clearInterval(gdAnimTimer);
+          gdAnimTimer = null;
+        }
+      }, 50);
+    }
+
+    function drawLossContour(maxDrawSteps = 999) {
+      const canvas = document.getElementById('canvas-contour');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+
+      const halfW = W / 2;
+      const lr = parseFloat(document.getElementById('gd-lr-slider').value) || 0.12;
+      const cond = parseFloat(document.getElementById('gd-cond-slider').value) || 16.0;
+
+      // Left panel: Unscaled (Elongated Ellipse, Condition Number >> 1)
+      ctx.fillStyle = "#f59e0b";
+      ctx.font = "bold 10px system-ui";
+      ctx.textAlign = "center";
+      ctx.fillText(`Unscaled (κ = ${cond.toFixed(0)})`, halfW / 2, 18);
+
+      const cx1 = halfW / 2, cy1 = H / 2 + 10;
+      for (let r = 15; r <= 80; r += 15) {
+        ctx.strokeStyle = "rgba(245, 158, 11, 0.35)";
+        ctx.beginPath();
+        ctx.ellipse(cx1, cy1, r * 1.4, r * (1.4 / Math.sqrt(cond)), 0, 0, 2 * Math.PI);
+        ctx.stroke();
+      }
+
+      // Simulate Unscaled Path
+      let w1 = gdStartW1;
+      let w2 = gdStartW2;
+      ctx.strokeStyle = "#f43f5e";
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(cx1 + w1 * 50, cy1 - w2 * 50);
+
+      for (let s = 0; s < Math.min(25, maxDrawSteps); s++) {
+        const grad1 = 2 * w1;
+        const grad2 = 2 * (cond * 0.25) * w2;
+        w1 -= lr * grad1;
+        w2 -= lr * grad2;
+        ctx.lineTo(cx1 + w1 * 50, cy1 - w2 * 50);
+      }
+      ctx.stroke();
+
+      // Right panel: Scaled (Isotropic Circles, Condition Number ≈ 1)
+      ctx.fillStyle = "#10b981";
+      ctx.fillText("Scaled (κ ≈ 1.0)", halfW + halfW / 2, 18);
+
+      const cx2 = halfW + halfW / 2, cy2 = H / 2 + 10;
+      for (let r = 12; r <= 60; r += 12) {
+        ctx.strokeStyle = "rgba(16, 185, 129, 0.35)";
+        ctx.beginPath();
+        ctx.arc(cx2, cy2, r, 0, 2 * Math.PI);
+        ctx.stroke();
+      }
+
+      // Simulate Scaled Path
+      let sw1 = gdStartW1;
+      let sw2 = gdStartW2;
+      ctx.strokeStyle = "#10b981";
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.moveTo(cx2 + sw1 * 40, cy2 - sw2 * 40);
+
+      for (let s = 0; s < Math.min(25, maxDrawSteps); s++) {
+        const grad1 = 2 * sw1;
+        const grad2 = 2 * sw2;
+        sw1 -= lr * grad1;
+        sw2 -= lr * grad2;
+        ctx.lineTo(cx2 + sw1 * 40, cy2 - sw2 * 40);
+      }
+      ctx.stroke();
+    }
+
+    // ==========================================
+    // MODULE 2: CATEGORICAL DUMMY TRAP & TARGET ENCODER
+    // ==========================================
+    let dummyStrategy = 'first';
+
+    function setDummyStrategy(strat) {
+      dummyStrategy = strat;
+      document.getElementById('btn-dummy-none').className = strat === 'none' ? 'px-3 py-1 bg-rose-600 rounded text-xs text-white transition font-bold shadow' : 'px-3 py-1 bg-slate-700 rounded text-xs text-white transition';
+      document.getElementById('btn-dummy-first').className = strat === 'first' ? 'px-3 py-1 bg-blue-600 rounded text-xs text-white transition font-bold shadow' : 'px-3 py-1 bg-slate-700 rounded text-xs text-white transition';
+      updateDummyMatrix();
+    }
+
+    function updateDummyMatrix() {
+      const container = document.getElementById('dummy-matrix-container');
+      const statusPill = document.getElementById('dummy-status-pill');
+      const sumCheck = document.getElementById('dummy-sum-check');
+      const detVal = document.getElementById('dummy-det-val');
+      const explanation = document.getElementById('dummy-explanation');
+
+      if (dummyStrategy === 'none') {
+        statusPill.innerText = "Rank Deficient (Singular Matrix!)";
+        statusPill.className = "text-rose-400 font-bold font-sans animate-pulse";
+        sumCheck.innerText = "d_Cash + d_Card + d_Ewallet = [1, 1, 1, 1]ᵀ = Intercept Column (Exact Multicollinearity!)";
+        detVal.innerText = "det(XᵀX) = 0.0000 (Non-Invertible)";
+        detVal.className = "font-mono text-rose-400 font-bold";
+        explanation.innerHTML = "<strong class='text-rose-400'>Dummy Variable Trap:</strong> The sum of all 3 dummy columns equals the intercept column x₀. OLS normal equation (XᵀX)β = Xᵀy has no unique inverse. The matrix cannot be inverted!";
+
+        container.innerHTML = `
+          <table class="w-full text-center border-collapse">
+            <tr class="text-slate-400 border-b border-slate-800">
+              <th>Obs</th><th class="text-amber-300">Intercept (x₀)</th><th>d_Card</th><th>d_Cash</th><th>d_Ewallet</th>
+            </tr>
+            <tr class="text-slate-300"><td>1 (Cash)</td><td class="text-amber-300 font-bold">1</td><td>0</td><td>1</td><td>0</td></tr>
+            <tr class="text-slate-300"><td>2 (Card)</td><td class="text-amber-300 font-bold">1</td><td>1</td><td>0</td><td>0</td></tr>
+            <tr class="text-slate-300"><td>3 (E-wal)</td><td class="text-amber-300 font-bold">1</td><td>0</td><td>0</td><td>1</td></tr>
+            <tr class="text-slate-300"><td>4 (Card)</td><td class="text-amber-300 font-bold">1</td><td>1</td><td>0</td><td>0</td></tr>
+          </table>
+        `;
+      } else {
+        statusPill.innerText = "Full Rank (Invertible)";
+        statusPill.className = "text-emerald-400 font-bold font-sans";
+        sumCheck.innerText = "Base 'Card' absorbed by Intercept β₀. No linear dependence.";
+        detVal.innerText = "det(XᵀX) > 0.00 (Unique OLS Solution)";
+        detVal.className = "font-mono text-emerald-400 font-bold";
+        explanation.innerHTML = "<strong class='text-emerald-400'>Dummy Trap Resolved:</strong> Dropping 'Card' leaves 2 dummy columns. The columns are linearly independent of the intercept, making (XᵀX) strictly positive definite and invertible.";
+
+        container.innerHTML = `
+          <table class="w-full text-center border-collapse">
+            <tr class="text-slate-400 border-b border-slate-800">
+              <th>Obs</th><th class="text-amber-300">Intercept (x₀)</th><th>d_Cash</th><th>d_Ewallet</th>
+            </tr>
+            <tr class="text-slate-300"><td>1 (Cash)</td><td class="text-amber-300 font-bold">1</td><td>1</td><td>0</td></tr>
+            <tr class="text-slate-300"><td>2 (Card=Base)</td><td class="text-amber-300 font-bold">1</td><td class="text-slate-500">0</td><td class="text-slate-500">0</td></tr>
+            <tr class="text-slate-300"><td>3 (E-wal)</td><td class="text-amber-300 font-bold">1</td><td>0</td><td>1</td></tr>
+            <tr class="text-slate-300"><td>4 (Card=Base)</td><td class="text-amber-300 font-bold">1</td><td class="text-slate-500">0</td><td class="text-slate-500">0</td></tr>
+          </table>
+        `;
+      }
+    }
+
+                // ==========================================
+    // MODULE 2: TARGET ENCODER LOGIC
+    // ==========================================
+    function updateTargetEncoder() {
+      const yGlobal = parseFloat(document.getElementById('te-global-mean').value) || 0.50;
+      const m = Math.max(0, parseFloat(document.getElementById('te-m-smooth').value) || 0.0);
+
+      // Concrete Bank Loan Default Benchmark: Applicant Job (X) -> Default Status y in {0, 1}
+      // 1. Developer: n = 3, y_bar = 2/3 ≈ 0.667
+      const nDev = 3, yDev = 2.0 / 3.0;
+      const lambdaDev = (nDev + m) > 0 ? (nDev / (nDev + m)) : 0.0;
+      const scoreDev = lambdaDev * yDev + (1.0 - lambdaDev) * yGlobal;
+
+      // 2. Designer: n = 2, y_bar = 0/2 = 0.000
+      const nDes = 2, yDes = 0.0;
+      const lambdaDes = (nDes + m) > 0 ? (nDes / (nDes + m)) : 0.0;
+      const scoreDes = lambdaDes * yDes + (1.0 - lambdaDes) * yGlobal;
+
+      // 3. Student (Rare level): n = 1, y_bar = 1/1 = 1.000
+      const nStu = 1, yStu = 1.0;
+      const lambdaStu = (nStu + m) > 0 ? (nStu / (nStu + m)) : 0.0;
+      const scoreStu = lambdaStu * yStu + (1.0 - lambdaStu) * yGlobal;
+
+      // 4. Doctor (Unseen level in test set): n = 0
+      const lambdaDoc = 0.0;
+      const scoreDoc = yGlobal;
+
+      // Update UI readouts (with backward-compatible element fallbacks)
+      const elDevLam = document.getElementById('te-dev-lambda') || document.getElementById('te-chrome-lambda');
+      const elDevRes = document.getElementById('te-dev-res') || document.getElementById('te-chrome-res');
+      if (elDevLam) elDevLam.innerText = lambdaDev.toFixed(3);
+      if (elDevRes) elDevRes.innerText = `S = ${scoreDev.toFixed(3)}`;
+
+      const elDesLam = document.getElementById('te-des-lambda') || document.getElementById('te-safari-lambda');
+      const elDesRes = document.getElementById('te-des-res') || document.getElementById('te-safari-res');
+      if (elDesLam) elDesLam.innerText = lambdaDes.toFixed(3);
+      if (elDesRes) elDesRes.innerText = `S = ${scoreDes.toFixed(3)}`;
+
+      const elStuLam = document.getElementById('te-stu-lambda') || document.getElementById('te-tor-lambda');
+      const elStuRes = document.getElementById('te-stu-res') || document.getElementById('te-tor-res');
+      if (elStuLam) elStuLam.innerText = lambdaStu.toFixed(3);
+      if (elStuRes) elStuRes.innerText = `S = ${scoreStu.toFixed(3)}`;
+
+      const elDocLam = document.getElementById('te-doc-lambda');
+      const elDocRes = document.getElementById('te-doc-res');
+      if (elDocLam) elDocLam.innerText = lambdaDoc.toFixed(3);
+      if (elDocRes) elDocRes.innerText = `S = ${scoreDoc.toFixed(3)}`;
+
+      drawShrinkageCurve(m);
+    }
+
+    function drawShrinkageCurve(m) {
+      const canvas = document.getElementById('canvas-shrinkage');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+
+      // 1. Draw smooth lambda curve: lambda(n) = n / (n + m) for n in [0, 10]
+      const maxN = 10;
+      ctx.strokeStyle = "#10b981";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let x = 0; x <= W; x++) {
+        const n = (x / W) * maxN;
+        const lambda = (n + m) > 0 ? (n / (n + m)) : 0;
+        const y = H - (lambda * (H - 24) + 12);
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // 2. Reference dashed lines
+      ctx.strokeStyle = "#334155";
+      ctx.setLineDash([2, 2]);
+      ctx.beginPath();
+      ctx.moveTo(0, H - 12); ctx.lineTo(W, H - 12);
+      ctx.moveTo(0, 12); ctx.lineTo(W, 12);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // 3. Highlight discrete points: Student (n=1), Designer (n=2), Developer (n=3)
+      const points = [
+        { n: 1, label: "Student", color: "#fbbf24" },
+        { n: 2, label: "Designer", color: "#c084fc" },
+        { n: 3, label: "Developer", color: "#60a5fa" }
+      ];
+
+      points.forEach(pt => {
+        const x = (pt.n / maxN) * W;
+        const lambda = (pt.n + m) > 0 ? (pt.n / (pt.n + m)) : 0;
+        const y = H - (lambda * (H - 24) + 12);
+
+        ctx.fillStyle = pt.color;
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, 2 * Math.PI);
+        ctx.fill();
+
+        ctx.font = "8px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(`n=${pt.n}`, x, y - 6);
+      });
+
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "9px monospace";
+      ctx.textAlign = "left";
+      ctx.fillText("n=0 (λ=0)", 5, H - 3);
+      ctx.textAlign = "right";
+      ctx.fillText("n=10 (λ→1)", W - 5, H - 3);
+      ctx.fillText("λ=1.0", 35, 10);
+    }
+
+    // ==========================================
+    // MODULE 3: ADVANCED DISTRIBUTION TRANSFORM ENGINE
+    // ==========================================
+    let currentRawData = [];
+    let currentDistType = 'lognormal';
+    let morphTimer = null;
+    let morphDirection = 1;
+    let currentProbeX = 25.0;
+
+    function generateRandomData(type) {
+      currentDistType = type;
+      const n = parseInt(document.getElementById('dist-sample-n').value) || 40;
+      const sigma = parseFloat(document.getElementById('dist-skew-sigma').value) || 1.2;
+      let data = [];
+
+      if (type === 'lognormal') {
+        for (let i = 0; i < n; i++) {
+          const u1 = Math.max(1e-6, Math.random());
+          const u2 = Math.random();
+          const z = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+          const val = Math.exp(1.5 + sigma * z);
+          data.push(parseFloat(val.toFixed(2)));
+        }
+      } else if (type === 'exponential') {
+        const rate = 1.0 / (sigma * 15.0);
+        for (let i = 0; i < n; i++) {
+          const val = -Math.log(1.0 - Math.random()) / rate + 0.5;
+          data.push(parseFloat(val.toFixed(2)));
+        }
+      } else if (type === 'bimodal') {
+        for (let i = 0; i < n; i++) {
+          if (Math.random() < 0.65) {
+            data.push(parseFloat((Math.random() * 8.0 + 1.0).toFixed(2)));
+          } else {
+            data.push(parseFloat((Math.random() * 60.0 * sigma + 20.0).toFixed(2)));
+          }
+        }
+      } else if (type === 'zeros') {
+        for (let i = 0; i < n; i++) {
+          if (Math.random() < 0.25) {
+            data.push(0.0);
+          } else {
+            const val = Math.exp(Math.random() * 3.5 * sigma);
+            data.push(parseFloat(val.toFixed(2)));
+          }
+        }
+      } else if (type === 'subzero') {
+        for (let i = 0; i < n; i++) {
+          const u = Math.random();
+          let val = (u - 0.3) * 50.0 * sigma;
+          data.push(parseFloat(val.toFixed(2)));
+        }
+      }
+
+      data.sort((a, b) => a - b);
+      currentRawData = data;
+      document.getElementById('custom-dist-input').value = data.slice(0, 15).join(', ') + (data.length > 15 ? ', ...' : '');
+      
+      const minX = Math.min(...data);
+      const maxX = Math.max(...data);
+      const probeSlider = document.getElementById('probe-slider');
+      probeSlider.min = minX.toFixed(1);
+      probeSlider.max = maxX.toFixed(1);
+      probeSlider.value = ((minX + maxX) * 0.35).toFixed(1);
+      currentProbeX = parseFloat(probeSlider.value);
+      document.getElementById('probe-slider-val').innerText = currentProbeX.toFixed(1);
+
+      updateDistributionSimulation();
+    }
+
+    function applyCustomDataInput() {
+      const rawStr = document.getElementById('custom-dist-input').value;
+      const parts = rawStr.split(',').map(s => parseFloat(s.trim())).filter(v => !isNaN(v));
+      if (parts.length >= 3) {
+        parts.sort((a, b) => a - b);
+        currentRawData = parts;
+        const minX = Math.min(...parts);
+        const maxX = Math.max(...parts);
+        const probeSlider = document.getElementById('probe-slider');
+        probeSlider.min = minX.toFixed(1);
+        probeSlider.max = maxX.toFixed(1);
+        probeSlider.value = ((minX + maxX) * 0.4).toFixed(1);
+        currentProbeX = parseFloat(probeSlider.value);
+        document.getElementById('probe-slider-val').innerText = currentProbeX.toFixed(1);
+        updateDistributionSimulation();
+      }
+    }
+
+    function updateLambdaFromSlider(val) {
+      const lambda = parseFloat(val);
+      let label = `λ = ${lambda.toFixed(2)}`;
+      if (Math.abs(lambda) < 0.03) label += ' (Log ln)';
+      else if (Math.abs(lambda - 0.5) < 0.03) label += ' (Square Root)';
+      else if (Math.abs(lambda - 1.0) < 0.03) label += ' (Linear)';
+      else if (Math.abs(lambda - (-1.0)) < 0.03) label += ' (Reciprocal)';
+      document.getElementById('slider-lambda-val').innerText = label;
+
+      if (Math.abs(lambda) < 0.03) document.getElementById('dist-curve-select').value = 'log';
+      else if (Math.abs(lambda - 0.5) < 0.03) document.getElementById('dist-curve-select').value = 'sqrt';
+      else if (Math.abs(lambda - 1.0) < 0.03) document.getElementById('dist-curve-select').value = 'linear';
+      else document.getElementById('dist-curve-select').value = 'boxcox';
+
+      updateDistributionSimulation();
+      const s2 = document.getElementById('dual-kde-lambda-slider');
+      if (s2) s2.value = lambda.toFixed(2);
+      const lbl2 = document.getElementById('dual-kde-lambda-val');
+      if (lbl2) lbl2.innerText = label;
+    }
+
+    function updateProbeFromSlider(val) {
+      currentProbeX = parseFloat(val);
+      document.getElementById('probe-slider-val').innerText = currentProbeX.toFixed(1);
+      updateDistributionSimulation();
+    }
+
+    function toggleMorphAnimation() {
+      const btn = document.getElementById('btn-morph-anim');
+      const icon = document.getElementById('morph-play-icon');
+      const label = document.getElementById('morph-play-label');
+
+      if (morphTimer) {
+        clearInterval(morphTimer);
+        morphTimer = null;
+        icon.innerText = '▶';
+        label.innerText = 'Play Morphing Animation';
+        btn.className = 'px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2';
+      } else {
+        icon.innerText = '⏸';
+        label.innerText = 'Pause Morphing';
+        btn.className = 'px-4 py-2 bg-gradient-to-r from-amber-600 to-rose-600 hover:from-amber-500 hover:to-rose-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2';
+        
+        morphTimer = setInterval(() => {
+          let currentL = parseFloat(document.getElementById('slider-lambda').value);
+          currentL += 0.03 * morphDirection;
+          if (currentL >= 1.8) {
+            currentL = 1.8;
+            morphDirection = -1;
+          } else if (currentL <= -0.8) {
+            currentL = -0.8;
+            morphDirection = 1;
+          }
+          document.getElementById('slider-lambda').value = currentL.toFixed(2);
+          updateLambdaFromSlider(currentL.toFixed(2));
+        }, 40);
+      }
+    }
+
+    function setOptimalLambda() {
+      let bestLambda = 0.0;
+      let minAbsSkew = 999;
+      for (let l = -2.0; l <= 2.0; l += 0.05) {
+        const trans = currentRawData.map(x => applyYeoJohnson(x, l));
+        const skew = Math.abs(calculateSkewness(trans));
+        if (skew < minAbsSkew) {
+          minAbsSkew = skew;
+          bestLambda = l;
+        }
+      }
+      document.getElementById('slider-lambda').value = bestLambda.toFixed(2);
+      updateLambdaFromSlider(bestLambda.toFixed(2));
+    }
+
+    function applyYeoJohnson(x, l) {
+      if (x >= 0) {
+        if (Math.abs(l) < 1e-6) return Math.log(x + 1);
+        return (Math.pow(x + 1, l) - 1) / l;
+      } else {
+        if (Math.abs(l - 2) < 1e-6) return -Math.log(-x + 1);
+        return -(Math.pow(-x + 1, 2 - l) - 1) / (2 - l);
+      }
+    }
+
+    function applyYeoJohnsonDerivative(x, l) {
+      if (x >= 0) {
+        return Math.pow(x + 1, l - 1);
+      } else {
+        return Math.pow(-x + 1, 1 - l);
+      }
+    }
+
+    function calculateSkewness(arr) {
+      const n = arr.length;
+      if (n < 3) return 0;
+      const mean = arr.reduce((a, b) => a + b, 0) / n;
+      const m2 = arr.reduce((acc, x) => acc + Math.pow(x - mean, 2), 0) / n;
+      const m3 = arr.reduce((acc, x) => acc + Math.pow(x - mean, 3), 0) / n;
+      const s = Math.sqrt(m2);
+      if (s === 0) return 0;
+      return m3 / Math.pow(s, 3);
+    }
+
+    function updateDistributionSimulation() {
+      if (!currentRawData || currentRawData.length === 0) generateRandomData('lognormal');
+      const lambda = parseFloat(document.getElementById('slider-lambda').value);
+      const minVal = Math.min(...currentRawData);
+      const alertBanner = document.getElementById('domain-alert-banner');
+
+      // Check Domain Safety
+      if (minVal > 0) {
+        alertBanner.className = "p-3 rounded-xl border text-xs leading-relaxed transition-all mt-3 bg-emerald-950/30 border-emerald-800/40 text-emerald-300";
+        alertBanner.innerHTML = `✅ <strong>Strictly Positive Domain:</strong> Min value is ${minVal.toFixed(1)} &gt; 0. Box-Cox, Log, and Yeo-Johnson are all mathematically valid.`;
+      } else {
+        alertBanner.className = "p-3 rounded-xl border text-xs leading-relaxed transition-all mt-3 bg-rose-950/40 border-rose-800/60 text-rose-300";
+        alertBanner.innerHTML = `❌ <strong>Box-Cox Crashed! (Non-Positive Values Detected):</strong> Min value is ${minVal.toFixed(1)} ≤ 0. Box-Cox yields undefined logarithm (ln ≤ 0). <strong>Yeo-Johnson</strong> must be used!`;
+      }
+
+      // Compute Transformed Values
+      const transformedData = currentRawData.map(x => applyYeoJohnson(x, lambda));
+
+      // Calculate Skewness
+      const rawSkew = calculateSkewness(currentRawData);
+      const transSkew = calculateSkewness(transformedData);
+
+      document.getElementById('metric-raw-skew').innerText = `${rawSkew >= 0 ? '+' : ''}${rawSkew.toFixed(2)} (${Math.abs(rawSkew) > 1 ? 'Heavy Skew' : 'Moderate'})`;
+      document.getElementById('metric-trans-skew').innerText = `${transSkew >= 0 ? '+' : ''}${transSkew.toFixed(2)} (${Math.abs(transSkew) < 0.2 ? 'Nearly Normal!' : 'Residual Skew'})`;
+      document.getElementById('metric-trans-skew').className = Math.abs(transSkew) < 0.25 ? "font-mono font-bold text-emerald-400 text-sm" : "font-mono font-bold text-amber-400 text-sm";
+
+      // Calculate span ratio
+      const rawSpan = Math.max(...currentRawData) - Math.min(...currentRawData) || 1;
+      const transSpan = Math.max(...transformedData) - Math.min(...transformedData) || 1;
+      const compression = rawSpan / transSpan;
+      document.getElementById('metric-span-ratio').innerText = `Compressed ${compression.toFixed(1)}x`;
+
+      // Update Probe Math Readout
+      const probeSlope = applyYeoJohnsonDerivative(currentProbeX, lambda);
+      const probeCompress = probeSlope !== 0 ? (1.0 / probeSlope) : 999;
+      document.getElementById('probe-math-readout').innerHTML = `
+        Probe x₀ = <span class="text-amber-300 font-bold">${currentProbeX.toFixed(1)}</span>: 
+        Slope dy/dx = <span class="text-emerald-400 font-bold">${probeSlope.toFixed(3)}</span> 
+        ⟹ 1 unit on X maps to <span class="text-blue-400 font-bold">${probeSlope.toFixed(3)}</span> on Y 
+        (<span class="text-amber-400 font-bold">${probeCompress >= 1 ? probeCompress.toFixed(1) + 'x compression' : (1/probeCompress).toFixed(1) + 'x expansion'}</span>)
+      `;
+
+      // Draw Projections, Histograms, and Q-Q Plot
+      drawProjectionCanvas(currentRawData, transformedData, lambda);
+      drawHistograms(currentRawData, transformedData);
+      drawQQPlot(transformedData);
+      drawDualKdeStudio(lambda);
+      drawDualKdeStudio(lambda);
+    }
+
+    function drawProjectionCanvas(raw, trans, lambda) {
+      const canvas = document.getElementById('canvas-projection');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width;
+      const H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+
+      const padX = 70, padY = 40;
+      const plotW = W - padX - 40;
+      const plotH = H - padY - 40;
+
+      const minX = Math.min(...raw, currentProbeX);
+      const maxX = Math.max(...raw, currentProbeX);
+      const minY = Math.min(...trans, applyYeoJohnson(currentProbeX, lambda));
+      const maxY = Math.max(...trans, applyYeoJohnson(currentProbeX, lambda));
+
+      const spanX = maxX - minX || 1;
+      const spanY = maxY - minY || 1;
+
+      // Coordinate axes
+      ctx.strokeStyle = "#334155";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(padX, padY);
+      ctx.lineTo(padX, padY + plotH);
+      ctx.lineTo(padX + plotW, padY + plotH);
+      ctx.stroke();
+
+      // Axis Titles
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "10px system-ui";
+      ctx.textAlign = "center";
+      ctx.fillText("Raw Feature Domain (X)", padX + plotW / 2, H - 8);
+      ctx.save();
+      ctx.translate(16, padY + plotH / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText("Transformed Domain Y = f(X)", 0, 0);
+      ctx.restore();
+
+      // Draw Continuous Function Curve y = f(x)
+      ctx.strokeStyle = "#38bdf8";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      const steps = 140;
+      for (let i = 0; i <= steps; i++) {
+        const xVal = minX + (i / steps) * spanX;
+        const yVal = applyYeoJohnson(xVal, lambda);
+        const px = padX + ((xVal - minX) / spanX) * plotW;
+        const py = padY + plotH - ((yVal - minY) / spanY) * plotH;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+
+      // Draw Projection Rays for sample points
+      raw.forEach((x, idx) => {
+        const y = trans[idx];
+        const px = padX + ((x - minX) / spanX) * plotW;
+        const py = padY + plotH - ((y - minY) / spanY) * plotH;
+
+        ctx.strokeStyle = "rgba(245, 158, 11, 0.35)";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(px, padY + plotH);
+        ctx.lineTo(px, py);
+        ctx.lineTo(padX, py);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.beginPath();
+        ctx.arc(px, py, 4, 0, 2 * Math.PI);
+        ctx.fillStyle = "#38bdf8";
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(px, padY + plotH, 3, 0, 2 * Math.PI);
+        ctx.fillStyle = "#f59e0b";
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(padX, py, 3, 0, 2 * Math.PI);
+        ctx.fillStyle = "#10b981";
+        ctx.fill();
+      });
+
+      // Draw Interactive Probe Point and Tangent Line
+      const probeY = applyYeoJohnson(currentProbeX, lambda);
+      const probePX = padX + ((currentProbeX - minX) / spanX) * plotW;
+      const probePY = padY + plotH - ((probeY - minY) / spanY) * plotH;
+      const slope = applyYeoJohnsonDerivative(currentProbeX, lambda);
+
+      ctx.strokeStyle = "#f43f5e";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 2]);
+      ctx.beginPath();
+      ctx.moveTo(probePX, padY + plotH);
+      ctx.lineTo(probePX, probePY);
+      ctx.lineTo(padX, probePY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      const tLen = 45;
+      const screenSlope = -slope * (plotH / spanY) * (spanX / plotW);
+      const angle = Math.atan(screenSlope);
+
+      ctx.strokeStyle = "#facc15";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(probePX - tLen * Math.cos(angle), probePY - tLen * Math.sin(angle));
+      ctx.lineTo(probePX + tLen * Math.cos(angle), probePY + tLen * Math.sin(angle));
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(probePX, probePY, 6.5, 0, 2 * Math.PI);
+      ctx.fillStyle = "#f43f5e";
+      ctx.fill();
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = "#cbd5e1";
+      ctx.font = "bold 11px system-ui";
+      ctx.textAlign = "left";
+      ctx.fillText(`Active Transform Curve (λ = ${lambda.toFixed(2)})`, padX + 15, padY + 20);
+    }
+
+    
+    
+        // ==========================================
+    // DUAL-KDE SKEWNESS MORPHING LOGIC
+    // ==========================================
+    let rightSkewRaw = [];
+    let leftSkewRaw = [];
+
+    function rationalApproximation(t) {
+      const c = [2.515517, 0.802853, 0.010328];
+      const d = [1.432788, 0.189269, 0.001308];
+      return t - ((c[2] * t + c[1]) * t + c[0]) / (((d[2] * t + d[1]) * t + d[0]) * t + 1.0);
+    }
+
+    function normalInv(p) {
+      if (p <= 0 || p >= 1) return 0;
+      if (p < 0.5) return -rationalApproximation(Math.sqrt(-2.0 * Math.log(p)));
+      return rationalApproximation(Math.sqrt(-2.0 * Math.log(1.0 - p)));
+    }
+
+    function initDualKdeData(addNoise = false) {
+      rightSkewRaw = [];
+      leftSkewRaw = [];
+      const n = 140;
+
+      for (let i = 0; i < n; i++) {
+        const p = (i + 0.5) / n;
+        let z = normalInv(p);
+        if (addNoise) {
+          z += (Math.random() - 0.5) * 0.15;
+        }
+        z = Math.max(-2.65, Math.min(2.65, z));
+
+        // 1. Right-Skewed Data: Log-normal distribution
+        // When lambda = 0 (Log ln), ln(X) = 0.68 * z + 1.25 is purely Gaussian!
+        const valRight = Math.exp(0.68 * z + 1.25);
+        rightSkewRaw.push(parseFloat(valRight.toFixed(3)));
+
+        // 2. Left-Skewed Data: Quadratic-inverse distribution
+        // When lambda = 2.0 (Square), (X^2 - 1)/2 is purely Gaussian!
+        const w = 3.6 + 1.15 * z;
+        const valLeft = Math.sqrt(Math.max(0.1, w));
+        leftSkewRaw.push(parseFloat(valLeft.toFixed(3)));
+      }
+      rightSkewRaw.sort((a, b) => a - b);
+      leftSkewRaw.sort((a, b) => a - b);
+    }
+
+    function resampleDualKdeData() {
+      initDualKdeData(true);
+      const lambda = parseFloat(document.getElementById('slider-lambda').value);
+      drawDualKdeStudio(lambda);
+    }
+
+    function syncAllLambda(val) {
+      const l = parseFloat(val);
+      const s1 = document.getElementById('slider-lambda');
+      const s2 = document.getElementById('dual-kde-lambda-slider');
+      if (s1) s1.value = l.toFixed(2);
+      if (s2) s2.value = l.toFixed(2);
+
+      let label = `λ = ${l.toFixed(2)}`;
+      if (Math.abs(l) < 0.03) label += ' (Log ln)';
+      else if (Math.abs(l - 0.5) < 0.03) label += ' (Square Root)';
+      else if (Math.abs(l - 1.0) < 0.03) label += ' (Linear Identity)';
+      else if (Math.abs(l - 2.0) < 0.03) label += ' (Quadratic Power)';
+      else if (Math.abs(l - (-1.0)) < 0.03) label += ' (Reciprocal 1/x)';
+      else if (Math.abs(l - (-2.0)) < 0.03) label += ' (Inverse Square 1/x²)';
+
+      const lbl1 = document.getElementById('slider-lambda-val');
+      const lbl2 = document.getElementById('dual-kde-lambda-val');
+      if (lbl1) lbl1.innerText = label;
+      if (lbl2) lbl2.innerText = label;
+
+      const sel = document.getElementById('dist-curve-select');
+      if (sel) {
+        if (Math.abs(l) < 0.03) sel.value = 'log';
+        else if (Math.abs(l - 0.5) < 0.03) sel.value = 'sqrt';
+        else if (Math.abs(l - 1.0) < 0.03) sel.value = 'linear';
+        else sel.value = 'boxcox';
+      }
+
+      updateDistributionSimulation();
+    }
+
+    function updateLambdaFromSlider(val) {
+      syncAllLambda(val);
+    }
+
+    function onDistCurveSelectChange(val) {
+      if (val === 'log') syncAllLambda(0.00);
+      else if (val === 'sqrt') syncAllLambda(0.50);
+      else if (val === 'linear') syncAllLambda(1.00);
+      else if (val === 'boxcox') syncAllLambda(0.00);
+      else if (val === 'yeojohnson') syncAllLambda(0.00);
+      else updateDistributionSimulation();
+    }
+
+    function computeStandardizedKDE(data, points = 80, minZ = -3.5, maxZ = 3.5) {
+      const n = data.length;
+      if (n === 0) return [];
+      const mean = data.reduce((a, b) => a + b, 0) / n;
+      const std = Math.sqrt(data.reduce((acc, x) => acc + Math.pow(x - mean, 2), 0) / (n - 1)) || 1;
+      const zScores = data.map(x => (x - mean) / std);
+      const h = 0.85 * Math.pow(n, -0.2);
+
+      let kde = [];
+      const step = (maxZ - minZ) / (points - 1);
+      for (let i = 0; i < points; i++) {
+        const z = minZ + i * step;
+        let sum = 0;
+        for (let j = 0; j < n; j++) {
+          const u = (z - zScores[j]) / h;
+          sum += Math.exp(-0.5 * u * u);
+        }
+        const density = sum / (n * h * Math.sqrt(2 * Math.PI));
+        kde.push({ z, density });
+      }
+      return kde;
+    }
+
+    function drawSingleKdeCanvas(canvasId, rawData, lambda, baseColor, activeColor, skewId, fitId, badgeId, optLambda) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const w = rect.width > 0 ? rect.width : (canvas.clientWidth > 0 ? canvas.clientWidth : 520);
+      const h = rect.height > 0 ? rect.height : 224;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, w, h);
+
+      // Apply Box-Cox power transform for clean positive power morphing
+      const transData = rawData.map(x => {
+        if (Math.abs(lambda) < 0.03) return Math.log(Math.max(1e-5, x));
+        return (Math.pow(Math.max(1e-5, x), lambda) - 1.0) / lambda;
+      });
+
+      const transSkew = calculateSkewness(transData);
+
+      // Standardized KDEs
+      const rawKde = computeStandardizedKDE(rawData);
+      const transKde = computeStandardizedKDE(transData);
+
+      const minZ = -3.5, maxZ = 3.5;
+      const maxDensity = 0.52;
+      const padX = 35, padY = 25;
+      const plotW = w - padX * 2;
+      const plotH = h - padY * 2;
+
+      const toX = z => padX + ((z - minZ) / (maxZ - minZ)) * plotW;
+      const toY = d => padY + plotH - (d / maxDensity) * plotH;
+
+      // Draw Grid & Axes
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1;
+      for (let z = -3; z <= 3; z += 1) {
+        ctx.beginPath();
+        ctx.moveTo(toX(z), padY);
+        ctx.lineTo(toX(z), padY + plotH);
+        ctx.stroke();
+
+        ctx.fillStyle = '#64748b';
+        ctx.font = '9px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(z === 0 ? '0' : (z > 0 ? '+' + z + 'σ' : z + 'σ'), toX(z), h - 10);
+      }
+
+      // 1. Draw Target Standard Normal Gaussian Bell Curve N(0, 1)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.setLineDash([3, 3]);
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+
+      const bellPoints = 80;
+      for (let i = 0; i < bellPoints; i++) {
+        const z = minZ + (i / (bellPoints - 1)) * (maxZ - minZ);
+        const phi = (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * z * z);
+        const x = toX(z);
+        const y = toY(phi);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.lineTo(toX(maxZ), toY(0));
+      ctx.lineTo(toX(minZ), toY(0));
+      ctx.closePath();
+      ctx.fill();
+      ctx.setLineDash([]);
+
+      // 2. Draw Raw Baseline KDE (dashed reference)
+      ctx.strokeStyle = baseColor;
+      ctx.setLineDash([4, 3]);
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      rawKde.forEach((pt, i) => {
+        const x = toX(pt.z);
+        const y = toY(pt.density);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // 3. Draw Active Transformed KDE (morphing smoothly with lambda)
+      ctx.strokeStyle = activeColor;
+      ctx.fillStyle = activeColor + '20';
+      ctx.lineWidth = 2.6;
+      ctx.beginPath();
+      transKde.forEach((pt, i) => {
+        const x = toX(pt.z);
+        const y = toY(pt.density);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+      ctx.lineTo(toX(maxZ), toY(0));
+      ctx.lineTo(toX(minZ), toY(0));
+      ctx.closePath();
+      ctx.fill();
+
+      // Compute Gaussian Alignment / Overlap
+      let overlapSum = 0;
+      const stepZ = (maxZ - minZ) / (transKde.length - 1);
+      transKde.forEach(pt => {
+        const phi = (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * pt.z * pt.z);
+        overlapSum += Math.abs(pt.density - phi) * stepZ;
+      });
+      const fidelity = Math.max(10, Math.min(99.8, (1 - 0.5 * overlapSum) * 100));
+
+      // Update UI readouts
+      const skewEl = document.getElementById(skewId);
+      const fitEl = document.getElementById(fitId);
+      const badgeEl = document.getElementById(badgeId);
+
+      if (skewEl) {
+        skewEl.innerText = `${transSkew >= 0 ? '+' : ''}${transSkew.toFixed(2)}`;
+        skewEl.className = Math.abs(transSkew) <= 0.20 ? 'font-bold text-emerald-400' : 'font-bold text-amber-400';
+      }
+      if (fitEl) {
+        fitEl.innerText = `${fidelity.toFixed(1)}%`;
+        fitEl.className = fidelity >= 90 ? 'font-bold text-emerald-400' : 'font-bold text-slate-300';
+      }
+      if (badgeEl) {
+        const isOptimal = Math.abs(transSkew) <= 0.20 || Math.abs(lambda - optLambda) <= 0.15;
+        if (isOptimal) {
+          badgeEl.className = 'px-2 py-1 rounded text-[10px] font-bold font-sans bg-emerald-950 text-emerald-300 border border-emerald-600 shadow-lg';
+          badgeEl.innerText = '🎯 Optimal Normal Fit!';
+        } else {
+          badgeEl.className = 'px-2 py-1 rounded text-[10px] font-bold font-sans bg-slate-900 text-slate-400 border border-slate-800';
+          badgeEl.innerText = lambda < optLambda ? 'Increase λ ➔' : 'Decrease λ ➔';
+        }
+      }
+    }
+
+    function drawDualKdeStudio(lambda) {
+      if (rightSkewRaw.length === 0 || leftSkewRaw.length === 0) {
+        initDualKdeData();
+      }
+      drawSingleKdeCanvas(
+        'canvas-kde-right',
+        rightSkewRaw,
+        lambda,
+        'rgba(245, 158, 11, 0.7)',
+        '#38bdf8',
+        'kde-right-skew',
+        'kde-right-fit',
+        'kde-right-badge',
+        0.00
+      );
+
+      drawSingleKdeCanvas(
+        'canvas-kde-left',
+        leftSkewRaw,
+        lambda,
+        'rgba(244, 63, 94, 0.7)',
+        '#10b981',
+        'kde-left-skew',
+        'kde-left-fit',
+        'kde-left-badge',
+        2.00
+      );
+    }
+
+    function drawHistograms(raw, trans) {
+      function renderHist(canvasId, data, color) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width, H = canvas.height;
+        ctx.clearRect(0, 0, W, H);
+
+        const numBins = 9;
+        const min = Math.min(...data);
+        const max = Math.max(...data);
+        const binWidth = (max - min) / numBins || 1;
+        const bins = new Array(numBins).fill(0);
+
+        data.forEach(x => {
+          let b = Math.floor((x - min) / binWidth);
+          if (b >= numBins) b = numBins - 1;
+          bins[b]++;
+        });
+
+        const maxCount = Math.max(...bins, 1);
+        const pad = 25;
+        const barW = (W - pad * 2) / numBins;
+
+        bins.forEach((count, i) => {
+          const barH = (count / maxCount) * (H - 50);
+          const x = pad + i * barW;
+          const y = H - 25 - barH;
+
+          ctx.fillStyle = color;
+          ctx.fillRect(x + 2, y, barW - 4, barH);
+
+          if (count > 0) {
+            ctx.fillStyle = "#cbd5e1";
+            ctx.font = "9px monospace";
+            ctx.textAlign = "center";
+            ctx.fillText(count, x + barW / 2, y - 4);
+          }
+        });
+
+        ctx.strokeStyle = "#475569";
+        ctx.beginPath();
+        ctx.moveTo(pad, H - 25);
+        ctx.lineTo(W - pad, H - 25);
+        ctx.stroke();
+      }
+
+      renderHist('canvas-hist-raw', raw, "rgba(245, 158, 11, 0.65)");
+      renderHist('canvas-hist-trans', trans, "rgba(16, 185, 129, 0.65)");
+    }
+
+    function drawQQPlot(data) {
+      const canvas = document.getElementById('canvas-qq');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+
+      const n = data.length;
+      const sorted = [...data].sort((a, b) => a - b);
+      const pad = 20;
+
+      ctx.strokeStyle = "#f43f5e";
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(pad, H - pad);
+      ctx.lineTo(W - pad, pad);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      const minS = sorted[0];
+      const maxS = sorted[n - 1];
+      const spanS = maxS - minS || 1;
+
+      sorted.forEach((val, i) => {
+        const p = (i + 0.5) / n;
+        const normTheo = (p - 0.1) / 0.8;
+        const normEmp = (val - minS) / spanS;
+
+        const x = pad + normTheo * (W - pad * 2);
+        const y = H - pad - normEmp * (H - pad * 2);
+
+        ctx.beginPath();
+        ctx.arc(x, y, 3.5, 0, 2 * Math.PI);
+        ctx.fillStyle = "#a855f7";
+        ctx.fill();
+        ctx.strokeStyle = "#0f172a";
+        ctx.stroke();
+      });
+    }
+
+    function resetDistView() {
+      document.getElementById('slider-lambda').value = "1.00";
+      updateLambdaFromSlider("1.00");
+    }
+
+    // ==========================================
+    // MODULE 4: ADVANCED DISCRETIZATION & COMBINATORICS
+    // ==========================================
+    function updateKBinsSimulation() {
+      const k = parseInt(document.getElementById('kbins-slider').value) || 3;
+      const strat = document.getElementById('kbins-strategy').value;
+      const samples = [18, 22, 25, 40, 65, 80];
+      const min = 18.0, max = 80.0;
+
+      let edges = [];
+      if (strat === 'uniform') {
+        const width = (max - min) / k;
+        for (let i = 0; i <= k; i++) edges.push(min + i * width);
+      } else if (strat === 'quantile') {
+        edges = [18.0];
+        const step = samples.length / k;
+        for (let i = 1; i < k; i++) edges.push(samples[Math.round(i * step)]);
+        edges.push(80.0);
+      } else {
+        edges = [18.0, 31.0, 62.0, 80.0];
+      }
+
+      document.getElementById('kbins-edges-text').innerText = '[' + edges.map(e => e.toFixed(1)).join(', ') + ']';
+
+      const canvas = document.getElementById('canvas-kbins');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+
+      edges.forEach((e) => {
+        const norm = (e - min) / (max - min);
+        const x = 15 + norm * (W - 30);
+        ctx.strokeStyle = "#38bdf8";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(x, 10);
+        ctx.lineTo(x, H - 25);
+        ctx.stroke();
+
+        ctx.fillStyle = "#94a3b8";
+        ctx.font = "8px monospace";
+        ctx.fillText(e.toFixed(0), x - 6, H - 10);
+      });
+    }
+
+    function updatePolySimulation() {
+      const p = parseInt(document.getElementById('poly-p-slider').value) || 5;
+      const d = parseInt(document.getElementById('poly-d-slider').value) || 2;
+
+      function combinations(n, k) {
+        if (k < 0 || k > n) return 0;
+        if (k === 0 || k === n) return 1;
+        let c = 1;
+        for (let i = 1; i <= k; i++) c = c * (n - (k - i)) / i;
+        return Math.round(c);
+      }
+
+      const totalFeatures = combinations(p + d, d) - 1;
+      const countEl = document.getElementById('poly-result-count');
+      const statusEl = document.getElementById('poly-status-tag');
+
+      countEl.innerText = totalFeatures.toLocaleString() + ' Features';
+
+      if (totalFeatures < 100) {
+        countEl.className = "text-2xl font-bold font-mono text-emerald-400 my-1";
+        statusEl.innerText = "Feasible & Stable";
+        statusEl.className = "text-[11px] text-emerald-400";
+      } else if (totalFeatures < 1000) {
+        countEl.className = "text-2xl font-bold font-mono text-amber-400 my-1";
+        statusEl.innerText = "High Dimensionality (Risk of Overfit)";
+        statusEl.className = "text-[11px] text-amber-400";
+      } else {
+        countEl.className = "text-2xl font-bold font-mono text-rose-500 my-1";
+        statusEl.innerText = "COMBINATORIAL EXPLOSION! (Out of Memory)";
+        statusEl.className = "text-[11px] text-rose-500 font-bold";
+      }
+
+      const previewEl = document.getElementById('poly-terms-preview');
+      let terms = ['1'];
+      for (let i = 1; i <= Math.min(p, 4); i++) terms.push(`x${i}`);
+      if (d >= 2) {
+        for (let i = 1; i <= Math.min(p, 3); i++) {
+          terms.push(`x${i}²`);
+          for (let j = i + 1; j <= Math.min(p, 3); j++) {
+            terms.push(`x${i}x${j}`);
+          }
+        }
+      }
+      if (d >= 3 && p >= 2) terms.push(`x₁³`, `x₁²x₂`, `...`);
+      previewEl.innerHTML = terms.map(t => `<span class="px-1.5 py-0.5 bg-slate-900 rounded border border-slate-700">${t}</span>`).join(' ');
+    }
+
+    function updateTargetSimulation() {
+      const z = parseFloat(document.getElementById('target-slider').value) || 4.0;
+      const correctY = Math.expm1(z);
+      const blunderY = z;
+      const errorFactor = correctY / blunderY;
+
+      document.getElementById('target-correct-val').innerText = '$' + correctY.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + 'k';
+      document.getElementById('target-blunder-val').innerText = '$' + blunderY.toFixed(1) + 'k';
+      document.getElementById('target-error-ratio').innerText = errorFactor.toFixed(1) + 'x Underestimation!';
+    }
+
+    // Initialize all modules on startup (Default Module 1 active)
+    window.addEventListener('DOMContentLoaded', () => {
+      updateScalingSimulation();
+      drawLossContour();
+      updateDummyMatrix();
+      updateTargetEncoder();
+      generateRandomData('lognormal');
+      updateKBinsSimulation();
+      updatePolySimulation();
+      updateTargetSimulation();
+    });
+
+    // Reactive window resize handler for crisp canvas rendering
+    window.addEventListener('resize', () => {
+      const activeTab = document.querySelector('.tab-content:not(.hidden)');
+      if (activeTab && activeTab.id === 'tab-distribution') {
+        const l = parseFloat(document.getElementById('slider-lambda').value);
+        updateDistributionSimulation();
+        drawDualKdeStudio(l);
+      } else if (activeTab && activeTab.id === 'tab-scaling') {
+        updateScalingSimulation();
+        drawLossContour();
+      }
+    });
+  </script>
+</body>
+</html>
